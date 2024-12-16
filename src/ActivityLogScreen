@@ -1,0 +1,126 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.time.LocalDate;
+import java.util.List;
+
+public class ActivityLogScreen {
+
+    private ActivityLog activityLog;
+    private User user;
+
+    // 생성자
+    public ActivityLogScreen(User user) {
+        this.user = user;
+        this.activityLog = new ActivityLog();
+        showActivityLogMenu();
+    }
+
+    // 활동 기록 메뉴 화면
+    private void showActivityLogMenu() {
+        JFrame frame = new JFrame("운동 및 식단 기록");
+        frame.setLayout(new GridLayout(2, 1, 10, 10));
+
+        JButton addActivityButton = new JButton("활동 추가");
+        JButton viewActivitiesButton = new JButton("기록 보기");
+
+        addActivityButton.addActionListener(e -> showAddActivityScreen());
+        viewActivitiesButton.addActionListener(e -> showViewActivitiesScreen());
+
+        frame.add(addActivityButton);
+        frame.add(viewActivitiesButton);
+
+        frame.setSize(400, 200);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    // 활동 추가 화면
+    private void showAddActivityScreen() {
+        JFrame frame = new JFrame("활동 추가");
+
+        JLabel typeLabel = new JLabel("활동 종류:");
+        String[] types = {"운동", "식단"};
+        JComboBox<String> typeComboBox = new JComboBox<>(types);
+
+        JLabel nameLabel = new JLabel("활동명:");
+        JTextField nameField = new JTextField(15);
+
+        JLabel caloriesLabel = new JLabel("칼로리:");
+        JTextField caloriesField = new JTextField(10);
+
+        JLabel dateLabel = new JLabel("날짜 (YYYY-MM-DD):");
+        JTextField dateField = new JTextField(10);
+
+        JButton addButton = new JButton("추가");
+
+        addButton.addActionListener((ActionEvent e) -> {
+            String type = (String) typeComboBox.getSelectedItem();
+            String name = nameField.getText();
+            int calories = Integer.parseInt(caloriesField.getText());
+            String dateString = dateField.getText();
+
+            // 날짜 문자열을 LocalDate로 변환
+            LocalDate date = LocalDate.parse(dateString);
+
+            // 활동 추가
+            activityLog.addActivity(user, type, name, calories, dateString);
+
+            JOptionPane.showMessageDialog(frame, "활동이 추가되었습니다.");
+
+            frame.dispose(); // 화면 닫기
+        });
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(5, 2, 10, 10));
+
+        panel.add(typeLabel);
+        panel.add(typeComboBox);
+        panel.add(nameLabel);
+        panel.add(nameField);
+        panel.add(caloriesLabel);
+        panel.add(caloriesField);
+        panel.add(dateLabel);
+        panel.add(dateField);
+        panel.add(addButton);
+
+        frame.add(panel);
+        frame.setSize(400, 250);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    // 활동 기록 출력 화면
+    private void showViewActivitiesScreen() {
+        JFrame frame = new JFrame("기록 보기");
+
+        JTextArea activityTextArea = new JTextArea(10, 30);
+        activityTextArea.setEditable(false);
+
+        // 활동 기록 출력
+        String[][] activities = activityLog.saveToArray();
+        StringBuilder activityRecords = new StringBuilder();
+        for (String[] activity : activities) {
+            activityRecords.append(String.join(", ", activity)).append("\n");
+        }
+
+        activityTextArea.setText(activityRecords.toString());
+
+        JScrollPane scrollPane = new JScrollPane(activityTextArea);
+
+        JButton closeButton = new JButton("닫기");
+        closeButton.addActionListener(e -> frame.dispose());
+
+        JPanel panel = new JPanel();
+        panel.add(scrollPane);
+        panel.add(closeButton);
+
+        frame.add(panel);
+        frame.setSize(400, 300);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
