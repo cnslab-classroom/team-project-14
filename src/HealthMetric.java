@@ -1,7 +1,6 @@
 import java.sql.*;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Scanner;
 
 public class HealthMetric {
     private Connection connection;
@@ -170,79 +169,34 @@ public class HealthMetric {
 
     // 메인 실행
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
         // User 객체 생성
         User user = new User("홍길동", 25, 175.0, 70.0, "male");
         HealthMetric healthMetric = new HealthMetric();
 
-        while (true) {
-            System.out.println("\n===== 건강 데이터 관리 시스템 =====");
-            System.out.println("1. 건강 데이터 추가");
-            System.out.println("2. 저장된 데이터 조회");
-            System.out.println("3. 종료");
-            System.out.print("선택: ");
+        // 예시 데이터
+        String date = "2024-12-17";
+        double height = 1.75; // m
+        double weight = 70.0; // kg
+        int age = 25;
+        String gender = "male";
+        String sleepTime = "22:00";
+        String wakeTime = "06:00";
 
-            int choice;
-            try {
-                choice = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("숫자를 입력하세요.");
-                continue;
-            }
+        // User 객체의 BMI 계산, 체지방률 계산
+        double bmi = healthMetric.calculateBMI(weight, height);
+        double bodyFat = healthMetric.calculateBodyFatPercentage(bmi, age, gender);
+        double sleepHours = healthMetric.calculateSleepHours(sleepTime, wakeTime);
 
-            switch (choice) {
-                case 1:
-                    try {
-                        System.out.print("날짜 (YYYY-MM-DD): ");
-                        String date = scanner.nextLine();
+        // 건강 기록 추가
+        healthMetric.addRecord(date, bmi, bodyFat, sleepHours);
 
-                        System.out.print("키(m): ");
-                        double height = Double.parseDouble(scanner.nextLine());
+        // 건강 분석 결과 출력
+        healthMetric.analyzeHealthMetrics(bmi, bodyFat, sleepHours);
 
-                        System.out.print("몸무게(kg): ");
-                        double weight = Double.parseDouble(scanner.nextLine());
+        // 저장된 데이터 조회
+        healthMetric.printAllRecords();
 
-                        System.out.print("나이: ");
-                        int age = Integer.parseInt(scanner.nextLine());
-
-                        System.out.print("성별 (male/female): ");
-                        String gender = scanner.nextLine();
-
-                        System.out.print("취침 시간 (HH:mm): ");
-                        String sleepTime = scanner.nextLine();
-
-                        System.out.print("기상 시간 (HH:mm): ");
-                        String wakeTime = scanner.nextLine();
-
-                        // User 객체의 BMI 계산, 체지방률 계산
-                        double bmi = healthMetric.calculateBMI(weight, height);
-                        double bodyFat = healthMetric.calculateBodyFatPercentage(bmi, age, gender);
-                        double sleepHours = healthMetric.calculateSleepHours(sleepTime, wakeTime);
-
-                        // 건강 기록 추가
-                        healthMetric.addRecord(date, bmi, bodyFat, sleepHours);
-
-                        // 건강 분석 결과 출력
-                        healthMetric.analyzeHealthMetrics(bmi, bodyFat, sleepHours);
-                    } catch (Exception e) {
-                        System.out.println("입력 중 오류가 발생했습니다. 다시 시도하세요.");
-                    }
-                    break;
-
-                case 2:
-                    healthMetric.printAllRecords();
-                    break;
-
-                case 3:
-                    healthMetric.closeConnection();
-                    scanner.close();
-                    return;
-
-                default:
-                    System.out.println("잘못된 입력입니다. 다시 시도하세요.");
-                    break;
-            }
-        }
+        // 연결 종료
+        healthMetric.closeConnection();
     }
 }
