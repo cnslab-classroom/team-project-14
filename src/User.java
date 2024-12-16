@@ -120,30 +120,6 @@ public class User {
         return new double[] { minWeight, maxWeight };
     }
 
-    // 목표 체중 안내 메서드
-    public void printGoalInfo(double goalWeight) {
-        double[] idealRange = calculateIdealWeightRange();
-        double weightDifference = weight - goalWeight;
-
-        System.out.println("현재 BMI: " + String.format("%.2f", getBMI()));
-        System.out.println("권장 체중 범위: " + String.format("%.2f", idealRange[0]) + "kg ~ "
-                + String.format("%.2f", idealRange[1]) + "kg");
-
-        if (goalWeight < idealRange[0] || goalWeight > idealRange[1]) {
-            System.out.println("경고: 목표 체중이 권장 범위를 벗어났습니다.");
-        }
-
-        if (weightDifference > 0) {
-            System.out.println("목표 체중까지 감량해야 할 무게: " + String.format("%.2f", weightDifference) + "kg");
-            System.out.println("일일 500칼로리 적자 기준 감량 예상 소요 시간: 약 " + (weightDifference * 7700 / 500) + "일");
-        } else if (weightDifference < 0) {
-            System.out.println("목표 체중까지 증량해야 할 무게: " + String.format("%.2f", Math.abs(weightDifference)) + "kg");
-            System.out.println("일일 500칼로리 초과 기준 증량 예상 소요 시간: 약 " + (Math.abs(weightDifference) * 7700 / 500) + "일");
-        } else {
-            System.out.println("현재 체중이 목표 체중과 동일합니다!");
-        }
-    }
-
     // 활동 추가 메서드
     public void addActivity(User user, String category, String description, int calories, String date) {
         // activityLog의 addActivity 메서드 호출
@@ -154,15 +130,14 @@ public class User {
     public void printActivityLog() {
         activityLog.printActivities();
     }
-  }
+}
 
 class UserInfoScreen {
+    private User user; // User 객체를 멤버 변수로 선언
+
     UserInfoScreen() {
         JFrame frame = new JFrame("사용자 정보 입력");
-        frame.setLayout(new BorderLayout(10, 10)); // 여백 추가
-
-        // 중앙 패널: 입력 필드 및 버튼 배치
-        JPanel centerPanel = new JPanel(new GridLayout(7, 2, 10, 10));
+        frame.setLayout(new GridLayout(7, 2, 10, 10)); // 7행 2열의 GridLayout
 
         // 입력 필드 및 라벨
         JLabel nameLabel = new JLabel("이름:");
@@ -177,33 +152,44 @@ class UserInfoScreen {
         String[] genderOptions = { "Male", "Female" };
         JComboBox<String> genderComboBox = new JComboBox<>(genderOptions);
         JButton submitButton = new JButton("정보 저장");
-        JButton backButton = new JButton("뒤로 가기");
 
-        backButton.addActionListener(e -> frame.dispose());
+        // 컴포넌트 배치
+        frame.add(nameLabel);
+        frame.add(nameField);
+        frame.add(ageLabel);
+        frame.add(ageField);
+        frame.add(heightLabel);
+        frame.add(heightField);
+        frame.add(weightLabel);
+        frame.add(weightField);
+        frame.add(genderLabel);
+        frame.add(genderComboBox);
+        frame.add(submitButton);
 
-        // 중앙 패널에 컴포넌트 추가
-        centerPanel.add(nameLabel);
-        centerPanel.add(nameField);
-        centerPanel.add(ageLabel);
-        centerPanel.add(ageField);
-        centerPanel.add(heightLabel);
-        centerPanel.add(heightField);
-        centerPanel.add(weightLabel);
-        centerPanel.add(weightField);
-        centerPanel.add(genderLabel);
-        centerPanel.add(genderComboBox);
-        centerPanel.add(submitButton);
-        centerPanel.add(backButton);
+        // 버튼 클릭 이벤트 처리
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = nameField.getText();
+                int age = Integer.parseInt(ageField.getText());
+                double height = Double.parseDouble(heightField.getText());
+                double weight = Double.parseDouble(weightField.getText());
+                String gender = (String) genderComboBox.getSelectedItem();
 
-        // 위쪽과 아래쪽에 여백 패널 추가
-        frame.add(new JPanel(), BorderLayout.NORTH); // 상단 여백
-        frame.add(centerPanel, BorderLayout.CENTER); // 중앙 패널
-        frame.add(new JPanel(), BorderLayout.SOUTH); // 하단 여백
+                // User 객체 생성 후 값 설정
+                user = new User(name, age, height, weight, gender);
+                JOptionPane.showMessageDialog(frame, "정보 저장 완료!");
+            }
+        });
 
         // 프레임 설정
-        frame.setSize(400, 400); // 세로 길이 약간 확장
+        frame.setSize(400, 300);
         frame.setLocationRelativeTo(null); // 화면 중앙에 위치
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setVisible(true);
+    }
+
+    public User getUser() {
+        return user; // User 객체 반환
     }
 }
