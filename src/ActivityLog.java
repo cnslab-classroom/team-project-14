@@ -2,10 +2,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-//수정
-//수정
-//수정
-
 public class ActivityLog {
     // 운동 및 식단 데이터를 저장할 리스트 (배열 형식으로 관리)
     private List<String[]> activities;
