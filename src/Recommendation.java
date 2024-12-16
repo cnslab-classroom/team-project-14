@@ -1,10 +1,3 @@
-package com.example.myapplication;
-
-import android.app.Activity;
-import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -12,9 +5,9 @@ import java.sql.Statement;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-public class Recommendation extends Activity {
+public class Recommendation{
 
-    private TextView recommendationTextView;
+    
     private Connection connection;
     private User user;
     private HealthMetric healthMetric;
@@ -35,35 +28,7 @@ public class Recommendation extends Activity {
         this.maxWeight = idealWeightRange[1];
     }
 
-    /*@Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        recommendationTextView = findViewById(R.id.recommendationTextView);
-        Button weeklyReportButton = findViewById(R.id.weeklyReportButton);
-        Button monthlyReportButton = findViewById(R.id.monthlyReportButton);
-        Button recommendationButton = findViewById(R.id.recommendationButton);
-
-        // 주간 리포트 버튼
-        weeklyReportButton.setOnClickListener(v -> {
-            String weeklyReport = generateWeeklyReportFromStartOfMonth();
-            recommendationTextView.setText(weeklyReport);
-        });
-
-        // 월간 리포트 버튼
-        monthlyReportButton.setOnClickListener(v -> {
-            String monthlyReport = generateMonthlyReport();
-            recommendationTextView.setText(monthlyReport);
-        });
-
-        // 건강 조언 버튼
-        recommendationButton.setOnClickListener(v -> {
-            // printRecommend() 메서드가 String을 반환하도록 수정 필요
-            String recommendation = generateRecommendation();
-            recommendationTextView.setText(recommendation);
-        });
-    }*/
 
     private String generateRecommendation() {
         // printRecommend 메서드를 String으로 변환하여 호출

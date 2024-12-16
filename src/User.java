@@ -69,9 +69,9 @@ public void setGender(String gender) {
   // 체지방률 계산 메서드
   // 남성: 체지방률 = (1.20 × BMI) + (0.23 × 나이) − 16.2
   // 여성: 체지방률 = (1.20 × BMI) + (0.23 × 나이) − 5.4
-  public double calculateBodyFatPercentage(boolean isMale) {
+  public double calculateBodyFatPercentage() {
       double bmi = calculateBMI();
-      if (isMale) {
+      if (gender == "Male") {
           return (1.20 * bmi) + (0.23 * age) - 16.2;
       } else {
           return (1.20 * bmi) + (0.23 * age) - 5.4;
