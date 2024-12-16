@@ -1,0 +1,88 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class RecommendationGUI {
+
+    private Recommendation recommendation;
+
+    public RecommendationGUI(Recommendation recommendation) {
+        this.recommendation = recommendation;
+        createAndShowGUI();
+    }
+
+    private void createAndShowGUI() {
+        // Create the main frame
+        JFrame frame = new JFrame("Health Recommendation System");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 400);
+
+        // Create main panel
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+
+        // Text area to display recommendations and reports
+        JTextArea outputArea = new JTextArea();
+        outputArea.setEditable(false);
+        outputArea.setLineWrap(true);
+        outputArea.setWrapStyleWord(true);
+
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        // Buttons for actions
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(1, 3));
+
+        JButton recommendationButton = new JButton("Get Recommendation");
+        JButton weeklyReportButton = new JButton("Weekly Report");
+        JButton monthlyReportButton = new JButton("Monthly Report");
+
+        buttonPanel.add(recommendationButton);
+        buttonPanel.add(weeklyReportButton);
+        buttonPanel.add(monthlyReportButton);
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Add action listeners for buttons
+        recommendationButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String result = recommendation.generateRecommendation();
+                outputArea.setText(result);
+            }
+        });
+
+        weeklyReportButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String result = recommendation.generateWeeklyReportFromStartOfMonth();
+                outputArea.setText(result);
+            }
+        });
+
+        monthlyReportButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String result = recommendation.generateMonthlyReport();
+                outputArea.setText(result);
+            }
+        });
+
+        // Add panel to frame and make it visible
+        frame.add(panel);
+        frame.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        // Example setup
+        User user = new User("Alice", 25, "female", 60.0, 165.0);
+        ActivityLog activityLog = new ActivityLog();
+        HealthMetric healthMetric = new HealthMetric(22.5, 18.0, 7.5);
+
+        Recommendation recommendation = new Recommendation(user, activityLog, healthMetric);
+        new RecommendationGUI(recommendation);
+    }
+}
+
