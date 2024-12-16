@@ -1,34 +1,10 @@
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class ActivityLog {
-    // 운동 및 식단 기록을 저장할 내부 클래스
-    static class Activity {
-        String type; // 운동 또는 식단
-        String name; // 활동 이름
-        int calories; // 소모/섭취 칼로리
-        LocalDate date; // 기록 날짜
-
-        public Activity(String type, String name, int calories, LocalDate date) {
-            this.type = type;
-            this.name = name;
-            this.calories = calories;
-            this.date = date;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%s: %s, %d칼로리, 날짜: %s", type, name, calories, date);
-        }
-    }
-
-    // 운동 및 식단 데이터를 저장할 리스트
-    private List<Activity> activities;
+    // 운동 및 식단 데이터를 저장할 리스트 (배열 형식으로 관리)
+    private List<String[]> activities;
 
     // 생성자
     public ActivityLog() {
@@ -37,48 +13,34 @@ public class ActivityLog {
 
     // 활동 기록 추가
     public void addActivity(String type, String name, int calories, LocalDate date) {
-        activities.add(new Activity(type, name, calories, date));
+        activities.add(new String[] { type, name, String.valueOf(calories), date.toString() });
     }
 
     // 특정 날짜의 총 칼로리 소모/섭취 계산
     public int getTotalCalories(String type, LocalDate date) {
         return activities.stream()
-                .filter(a -> a.type.equalsIgnoreCase(type) && a.date.equals(date))
-                .mapToInt(a -> a.calories)
+                .filter(a -> a[0].equalsIgnoreCase(type) && a[3].equals(date.toString()))
+                .mapToInt(a -> Integer.parseInt(a[2]))
                 .sum();
     }
 
-    // 기록 JSON으로 저장
-    public String saveToJSON() {
-        JSONArray jsonArray = new JSONArray();
-        for (Activity activity : activities) {
-            JSONObject obj = new JSONObject();
-            obj.put("type", activity.type);
-            obj.put("name", activity.name);
-            obj.put("calories", activity.calories);
-            obj.put("date", activity.date.toString());
-            jsonArray.put(obj);
-        }
-        return jsonArray.toString();
+    // 기록 배열로 저장
+    public String[][] saveToArray() {
+        return activities.toArray(new String[0][]);
     }
 
-    // JSON으로부터 기록 불러오기
-    public void loadFromJSON(String jsonData) {
-        JSONArray jsonArray = new JSONArray(jsonData);
+    // 배열로부터 기록 불러오기
+    public void loadFromArray(String[][] data) {
         activities.clear();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject obj = jsonArray.getJSONObject(i);
-            addActivity(
-                    obj.getString("type"),
-                    obj.getString("name"),
-                    obj.getInt("calories"),
-                    LocalDate.parse(obj.getString("date")));
+        for (String[] activity : data) {
+            activities.add(activity);
         }
     }
 
     // 활동 기록 출력
     public void printActivities() {
-        activities.forEach(System.out::println);
+        activities.forEach(a -> System.out.println(
+                String.format("%s: %s, %s칼로리, 날짜: %s", a[0], a[1], a[2], a[3])));
     }
 
     public static void main(String[] args) {
@@ -92,11 +54,15 @@ public class ActivityLog {
         System.out.println("오늘 운동 소모 칼로리: " + log.getTotalCalories("운동", LocalDate.now()));
         System.out.println("오늘 식단 섭취 칼로리: " + log.getTotalCalories("식단", LocalDate.now()));
 
-        // JSON 저장 및 불러오기
-        String jsonData = log.saveToJSON();
-        System.out.println("JSON 데이터 저장: " + jsonData);
+        // 배열로 저장 및 불러오기
+        String[][] savedData = log.saveToArray();
+        System.out.println("배열로 저장된 데이터:");
+        for (String[] activity : savedData) {
+            System.out.println(String.join(", ", activity));
+        }
 
-        log.loadFromJSON(jsonData);
+        log.loadFromArray(savedData);
+        System.out.println("배열로부터 불러온 데이터:");
         log.printActivities();
     }
 }
