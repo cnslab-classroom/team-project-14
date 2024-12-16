@@ -1,3 +1,8 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 public class User {
   // 사용자 기본 정보
   private String name;
@@ -100,4 +105,78 @@ public void setGender(String gender) {
       System.out.println("목표 체중까지 감량해야 할 무게: " + String.format("%.2f", weightToLose) + "kg");
       System.out.println("일일 500칼로리 적자 기준 감량 예상 소요 시간: 약 " + (weightToLose * 7700 / 500) + "일");
   }
+}
+
+class UserInfoScreen {
+    UserInfoScreen() {
+        JFrame frame = new JFrame("사용자 정보 입력");
+        frame.setLayout(new GridLayout(7, 2, 10, 10)); // 7행 2열의 GridLayout
+
+        // 입력 필드 및 라벨
+        JLabel nameLabel = new JLabel("이름:");
+        JTextField nameField = new JTextField();
+
+        JLabel ageLabel = new JLabel("나이:");
+        JTextField ageField = new JTextField();
+
+        JLabel heightLabel = new JLabel("키 (cm):");
+        JTextField heightField = new JTextField();
+
+        JLabel weightLabel = new JLabel("몸무게 (kg):");
+        JTextField weightField = new JTextField();
+
+        JLabel genderLabel = new JLabel("성별:");
+        String[] genderOptions = { "Male", "Female" };
+        JComboBox<String> genderComboBox = new JComboBox<>(genderOptions);
+
+        JButton submitButton = new JButton("정보 입력");
+        JLabel resultLabel = new JLabel("결과가 여기에 표시됩니다.", SwingConstants.CENTER);
+
+        // 버튼 클릭 시 동작 정의
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    // 사용자 입력값 가져오기
+                    String name = nameField.getText();
+                    int age = Integer.parseInt(ageField.getText());
+                    double height = Double.parseDouble(heightField.getText());
+                    double weight = Double.parseDouble(weightField.getText());
+                    String gender = (String) genderComboBox.getSelectedItem();
+
+                    // User 객체 생성 및 계산
+                    User user = new User(name, age, height, weight, gender);
+                    double bmi = user.calculateBMI();
+                    double bodyFatPercentage = user.calculateBodyFatPercentage();
+
+                    // 결과 표시
+                    resultLabel.setText("<html>이름: " + name + "<br>"
+                            + "BMI: " + String.format("%.2f", bmi) + "<br>"
+                            + "체지방률: " + String.format("%.2f", bodyFatPercentage) + "%</html>");
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(frame, "올바른 값을 입력해주세요.", "입력 오류", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        // 컴포넌트 배치
+        frame.add(nameLabel);
+        frame.add(nameField);
+        frame.add(ageLabel);
+        frame.add(ageField);
+        frame.add(heightLabel);
+        frame.add(heightField);
+        frame.add(weightLabel);
+        frame.add(weightField);
+        frame.add(genderLabel);
+        frame.add(genderComboBox);
+        frame.add(submitButton);
+        frame.add(resultLabel);
+
+        // 프레임 설정
+        frame.setSize(400, 300);
+        frame.setLocationRelativeTo(null); // 화면 중앙에 위치
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setVisible(true);
+    }
 }
