@@ -137,7 +137,7 @@ class MainMenuScreen {
         JButton healthAnalysisButton = new JButton("건강 지표 분석");
         JButton recordButton = new JButton("운동 및 식단 기록");
         JButton recommendationButton = new JButton("운동 및 식단 추천");
-        
+
         // "사용자 정보 입력" 버튼 클릭 시 UserInfoScreen으로 이동
         userInfoButton.addActionListener(e -> new UserInfoScreen());
 
