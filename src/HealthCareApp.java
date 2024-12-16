@@ -52,8 +52,10 @@ class LoginScreen {
             if (userDatabase.containsKey(username) && userDatabase.get(username).equals(password)) {
                 JOptionPane.showMessageDialog(frame, "로그인 성공!");
                 frame.dispose();
-                new MainMenuScreen(username);
-            } else {
+                 // 로그인 성공 후 User 객체 생성
+        User user = new User(username, 25, 170.0, 70.0, "Male"); // 예시: 실제로는 DB에서 정보 불러오기
+        new MainMenuScreen(user);  // MainMenuScreen에 User 객체 전달
+    } else {
                 JOptionPane.showMessageDialog(frame, "로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
             }
         });
@@ -191,12 +193,14 @@ class SignupScreen {
 
 
 class MainMenuScreen {
+    private User user; // User 객체 저장
     private Recommendation recommendation;
 
-   
-    MainMenuScreen(String username) {
-        JFrame frame = new JFrame("메인 메뉴 - " + username);
-        frame.setLayout(new GridLayout(5, 1, 10, 10)); // 4 -> 5로 변경하여 BMI 버튼 추가
+    // 생성자에서 User 객체를 받아서 초기화
+    MainMenuScreen(User user) {
+        this.user = user; // User 객체 초기화
+        JFrame frame = new JFrame("메인 메뉴 - " + user.getName());
+        frame.setLayout(new GridLayout(5, 1, 10, 10));
 
         JButton userInfoButton = new JButton("사용자 정보 입력");
         JButton healthAnalysisButton = new JButton("건강 지표 분석");
@@ -204,10 +208,10 @@ class MainMenuScreen {
         JButton recommendationButton = new JButton("운동 및 식단 추천");
         
         // "사용자 정보 입력" 버튼 클릭 시 UserInfoScreen으로 이동
-        userInfoButton.addActionListener(e -> new UserInfoScreen());
+        userInfoButton.addActionListener(e -> new UserInfoScreen(user));
 
         // "건강 지표 분석" 버튼 클릭 시 HealthMetricSwing 화면 호출
-        healthAnalysisButton.addActionListener(null);
+        healthAnalysisButton.addActionListener(e -> HealthMetricSwing.showHealthAnalysis(user));
 
         // "운동 및 식단 기록" 버튼 클릭 시 HealthMetricSwing 화면 호출
         recordButton.addActionListener(null);
