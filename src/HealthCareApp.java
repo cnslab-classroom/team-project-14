@@ -205,8 +205,6 @@ class MainMenuScreen {
         
         // "사용자 정보 입력" 버튼 클릭 시 UserInfoScreen으로 이동
         userInfoButton.addActionListener(e -> new UserInfoScreen());
-<<<<<<< HEAD
-=======
 
         // "건강 지표 분석" 버튼 클릭 시 HealthMetricSwing 화면 호출
         healthAnalysisButton.addActionListener(null);
@@ -216,7 +214,6 @@ class MainMenuScreen {
 
         // "운동 및 식단 추천" 버튼 클릭 시 HealthMetricSwing 화면 호출
         recommendationButton.addActionListener(null);
->>>>>>> f424b700d78e294b8dd893b6524b377782a154ae
 
         recommendationButton.addActionListener(e -> {
             // Recommendation 객체 생성
@@ -236,11 +233,8 @@ class MainMenuScreen {
         frame.setLocationRelativeTo(null); // 화면 중앙에 위치
         frame.setVisible(true);
     }
-<<<<<<< HEAD
+
 }
-=======
-}
-<<<<<<< HEAD
 
 
 class RecommendationGUI {
@@ -252,7 +246,7 @@ class RecommendationGUI {
     }
 
     private void createAndShowGUI() {
-        JFrame frame = new JFrame("Health Recommendation System");
+        JFrame frame = new JFrame("운동 및 식단 추천");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 400);
 
@@ -263,7 +257,7 @@ class RecommendationGUI {
         outputArea.setEditable(false);
         outputArea.setLineWrap(true);
         outputArea.setWrapStyleWord(true);
-        outputArea.setText("Welcome! Use the buttons below to generate reports or view recommendations.");
+        outputArea.setText("환영합니다! 아래 3개의 버튼 중 하나를 눌러를 원하는 결과를 확인해 보세요!");
 
         JScrollPane scrollPane = new JScrollPane(outputArea);
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -273,16 +267,16 @@ class RecommendationGUI {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JButton recommendationButton = new JButton("View Recommendation");
+        JButton recommendationButton = new JButton("운동 및 식단 추천");
         gbc.gridx = 0;
         gbc.gridy = 0;
         buttonPanel.add(recommendationButton, gbc);
 
-        JButton weeklyReportButton = new JButton("Generate Weekly Report");
+        JButton weeklyReportButton = new JButton("주간 분석");
         gbc.gridx = 1;
         buttonPanel.add(weeklyReportButton, gbc);
 
-        JButton monthlyReportButton = new JButton("Generate Monthly Report");
+        JButton monthlyReportButton = new JButton("월간 분석");
         gbc.gridx = 2;
         buttonPanel.add(monthlyReportButton, gbc);
 
@@ -309,6 +303,3 @@ class RecommendationGUI {
         frame.setVisible(true);
     }
 }
-=======
->>>>>>> f424b700d78e294b8dd893b6524b377782a154ae
->>>>>>> 61412c3306a0a066be3c2a31854f8b425134d4df
