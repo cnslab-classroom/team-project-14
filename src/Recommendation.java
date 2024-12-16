@@ -1,3 +1,4 @@
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -27,7 +28,7 @@ public class Recommendation {
         this.maxWeight = idealWeightRange[1];
     }
 
-    String generateRecommendation() {
+    private String generateRecommendation() {
         StringBuilder recommendation = new StringBuilder();
         int bodyFatStatus = checkBodyFatPercentage();
         int weightStatus = checkIdealWeight();

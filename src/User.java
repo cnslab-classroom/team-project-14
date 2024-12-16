@@ -35,6 +35,14 @@ public class User {
         this.activityLog = new ActivityLog(); // ActivityLog 객체 초기화
     }
 
+    public User(String username) {
+        this.userId = username;
+        this.exerciseLog = new ArrayList<>();
+        this.dietLog = new ArrayList<>();
+        this.healthMetric = new HealthMetric();
+        this.activityLog = new ActivityLog();
+    }
+
     public List<String> getExerciseLog() {
         return exerciseLog;
     }
@@ -124,11 +132,6 @@ public class User {
     public void addActivity(User user, String category, String description, int calories, String date) {
         // activityLog의 addActivity 메서드 호출
         activityLog.addActivity(user, category, description, calories, date); // User 객체를 전달
-    }
-
-    // ActivityLog 출력 메서드
-    public void printActivityLog() {
-        activityLog.printActivities();
     }
 }
 
