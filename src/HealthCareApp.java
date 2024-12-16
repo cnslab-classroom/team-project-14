@@ -11,7 +11,7 @@ public class HealthCareApp {
 
 class IntroScreen {
     IntroScreen() {
-        JFrame frame = new JFrame("헬스케어 앱");
+        JFrame frame = new JFrame("건강관리 프로그램");
         JLabel label = new JLabel("Welcome to HealthCare App!", SwingConstants.CENTER);
         label.setFont(label.getFont().deriveFont(20.0f));
 
