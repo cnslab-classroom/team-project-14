@@ -1,103 +1,149 @@
+import java.util.List;
+
 public class User {
-  // 사용자 기본 정보
-  private String name;
-  private int age;
-  private double height; // 단위: cm
-  private double weight; // 단위: kg
-  private String gender;
+    private String userId; // 사용자 아이디
+    private String name; // 실제 이름
+    private int age;
+    private double height;
+    private double weight;
+    private String gender;
+    private List<String> exerciseLog; // 운동 기록
+    private List<String> dietLog; // 식단 기록
 
-  // 생성자
-  public User(String name, int age, double height, double weight, String gender) {
-      this.name = name;
-      this.age = age;
-      this.height = height;
-      this.weight = weight;  //(허은빈) 체지방량 기준 판단하료면 성별 필요해서 성별도 추가했어용 
-      this.gender = gender;   //일요일에 회의하면서 다시 수정해보아요 
+    // HealthMetric 객체 참조
+    private HealthMetric healthMetric;
 
-  }
+    // ActivityLog 객체 참조 (사용자 활동 기록)
+    private ActivityLog activityLog;
 
-  // getter와 setter
-  public String getName() {
-      return name;
-  }
+    // 생성자
+    public User(String name, int age, double height, double weight, String gender) {
+        this.name = name;
+        this.age = age;
+        this.height = height;
+        this.weight = weight;
+        this.gender = gender;
+        this.healthMetric = new HealthMetric(); // HealthMetric 객체 초기화
+        this.activityLog = new ActivityLog(); // ActivityLog 객체 초기화
+    }
 
-  public void setName(String name) {
-      this.name = name;
-  }
+    public List<String> getExerciseLog() {
+        return exerciseLog;
+    }
 
-  public int getAge() {
-      return age;
-  }
+    public List<String> getDietLog() {
+        return dietLog;
+    }
 
-  public void setAge(int age) {
-      this.age = age;
-  }
+    // 예시로 운동과 식단 추가 메서드
+    public void addExercise(String exercise) {
+        exerciseLog.add(exercise);
+    }
 
+    public void addDiet(String diet) {
+        dietLog.add(diet);
+    }
 
-  public double getHeight() {
-      return height;
-  }
+    // HealthMetric 객체 반환 메서드
+    public HealthMetric getHealthMetric() {
+        return healthMetric; // HealthMetric 객체 반환
+    }
 
-  public void setHeight(double height) {
-      this.height = height;
-  }
+    public String getUserId() {
+        return userId;
+    }
 
-  public double getWeight() {
-      return weight;
-  }
+    // 사용자 정보를 반환하는 메서드
+    public String getName() {
+        return name;
+    }
 
-  public void setWeight(double weight) {
-      this.weight = weight;
-  }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  public String getGender() {
-    return gender;
-}
+    public int getAge() {
+        return age;
+    }
 
-public void setGender(String gender) {
-    this.gender = gender;
-}
+    public void setAge(int age) {
+        this.age = age;
+    }
 
-  
+    public double getHeight() {
+        return height;
+    }
 
-  // BMI 계산 메서드
-  public double calculateBMI() {
-      double heightInMeters = height / 100.0; // cm를 m로 변환
-      return weight / (heightInMeters * heightInMeters);
-  }
+    public void setHeight(double height) {
+        this.height = height;
+    }
 
-  // 체지방률 계산 메서드
-  // 남성: 체지방률 = (1.20 × BMI) + (0.23 × 나이) − 16.2
-  // 여성: 체지방률 = (1.20 × BMI) + (0.23 × 나이) − 5.4
-  public double calculateBodyFatPercentage() {
-      double bmi = calculateBMI();
-      if (gender == "Male") {
-          return (1.20 * bmi) + (0.23 * age) - 16.2;
-      } else {
-          return (1.20 * bmi) + (0.23 * age) - 5.4;
-      }
-  }
+    public double getWeight() {
+        return weight;
+    }
 
-  // 권장 체중 계산 (BMI 기준 18.5~24.9)
-  public double[] calculateIdealWeightRange() {
-      double heightInMeters = height / 100.0;
-      double minWeight = 18.5 * (heightInMeters * heightInMeters);
-      double maxWeight = 24.9 * (heightInMeters * heightInMeters);
-      return new double[] { minWeight, maxWeight };
-  }
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
 
-  // 목표 체중 안내 메서드
-  public void printGoalInfo(double goalWeight) {
-      double[] idealRange = calculateIdealWeightRange();
-      double weightToLose = weight - goalWeight;
-      System.out.println("현재 BMI: " + String.format("%.2f", calculateBMI()));
-      System.out.println("권장 체중 범위: " + String.format("%.2f", idealRange[0]) + "kg ~ " + String.format("%.2f", idealRange[1]) + "kg");
+    public String getGender() {
+        return gender;
+    }
 
-      if (goalWeight < idealRange[0] || goalWeight > idealRange[1]) {
-          System.out.println("경고: 목표 체중이 권장 범위를 벗어났습니다.");
-      }
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
-      System.out.println("목표 체중까지 감량해야 할 무게: " + String.format("%.2f", weightToLose) + "kg");
-      System.out.println("일일 500칼로리 적자 기준 감량 예상 소요 시간: 약 " + (weightToLose * 7700 / 500) + "일");
-  }
+    // BMI 계산 메서드 (HealthMetric을 통해 호출)
+    public double getBMI() {
+        return healthMetric.calculateBMI(weight, height); // height와 weight 전달
+    }
+
+    // 체지방률 계산 메서드 (HealthMetric을 통해 호출)
+    public double getBodyFatPercentage() {
+        return healthMetric.calculateBodyFatPercentage(getBMI(), age, gender); // BMI, 나이, 성별 전달
+    }
+
+    // 권장 체중 계산 (BMI 기준 18.5~24.9)
+    public double[] calculateIdealWeightRange() {
+        double heightInMeters = height / 100.0;
+        double minWeight = 18.5 * (heightInMeters * heightInMeters);
+        double maxWeight = 24.9 * (heightInMeters * heightInMeters);
+        return new double[] { minWeight, maxWeight };
+    }
+
+    // 목표 체중 안내 메서드
+    public void printGoalInfo(double goalWeight) {
+        double[] idealRange = calculateIdealWeightRange();
+        double weightDifference = weight - goalWeight;
+
+        System.out.println("현재 BMI: " + String.format("%.2f", getBMI()));
+        System.out.println("권장 체중 범위: " + String.format("%.2f", idealRange[0]) + "kg ~ "
+                + String.format("%.2f", idealRange[1]) + "kg");
+
+        if (goalWeight < idealRange[0] || goalWeight > idealRange[1]) {
+            System.out.println("경고: 목표 체중이 권장 범위를 벗어났습니다.");
+        }
+
+        if (weightDifference > 0) {
+            System.out.println("목표 체중까지 감량해야 할 무게: " + String.format("%.2f", weightDifference) + "kg");
+            System.out.println("일일 500칼로리 적자 기준 감량 예상 소요 시간: 약 " + (weightDifference * 7700 / 500) + "일");
+        } else if (weightDifference < 0) {
+            System.out.println("목표 체중까지 증량해야 할 무게: " + String.format("%.2f", Math.abs(weightDifference)) + "kg");
+            System.out.println("일일 500칼로리 초과 기준 증량 예상 소요 시간: 약 " + (Math.abs(weightDifference) * 7700 / 500) + "일");
+        } else {
+            System.out.println("현재 체중이 목표 체중과 동일합니다!");
+        }
+    }
+
+    // 활동 추가 메서드
+    public void addActivity(User user, String category, String description, int calories, String date) {
+        // activityLog의 addActivity 메서드 호출
+        activityLog.addActivity(user, category, description, calories, date); // User 객체를 전달
+    }
+
+    // ActivityLog 출력 메서드
+    public void printActivityLog() {
+        activityLog.printActivities();
+    }
 }

@@ -11,9 +11,51 @@ public class ActivityLog {
         this.activities = new ArrayList<>();
     }
 
-    // 활동 기록 추가
-    public void addActivity(String type, String name, int calories, LocalDate date) {
-        activities.add(new String[] { type, name, String.valueOf(calories), date.toString() });
+    // HealthMetric 데이터를 추가하는 메서드 (이제 User 객체를 통해 연동)
+    public void addHealthMetric(User user, String date) {
+        if (user.getHealthMetric() == null) {
+            System.out.println("HealthMetric 정보가 없습니다.");
+            return; // 혹은 예외 처리
+        }
+        double bmi = user.getHealthMetric().getBmi();
+        double bodyFatPercentage = user.getHealthMetric().getBodyFatPercentage();
+        double sleepHours = user.getHealthMetric().getSleepHours();
+
+        activities.add(new String[] {
+                "건강",
+                "BMI: " + bmi + ", 체지방률: " + bodyFatPercentage + "%, 수면시간: " + sleepHours + "시간",
+                "",
+                date.toString()
+        });
+    }
+
+    public boolean isActivityExist(String date) {
+        return activities.stream().anyMatch(a -> a[3].equals(date));
+    }
+
+    // 활동 추가 메서드 (건강 정보도 함께 기록)
+    public void addActivity(User user, String type, String name, int calories, String date) {
+        // 활동 기록에 사용자 정보를 포함
+        String username = user.getName();
+        String userId = user.getUserId();
+
+        // 건강 정보를 활동 기록에 추가
+        addHealthMetric(user, date);
+
+        // 운동 정보 및 식단 정보도 추가
+        String exerciseLog = String.join(", ", user.getExerciseLog());
+        String dietLog = String.join(", ", user.getDietLog());
+
+        // 활동 기록 추가
+        activities.add(new String[] {
+                type,
+                name,
+                String.valueOf(calories),
+                date.toString(),
+                "사용자: " + username + ", ID: " + userId,
+                "운동: " + exerciseLog,
+                "식단: " + dietLog
+        });
     }
 
     // 특정 날짜의 총 칼로리 소모/섭취 계산
@@ -39,30 +81,8 @@ public class ActivityLog {
 
     // 활동 기록 출력
     public void printActivities() {
-        activities.forEach(a -> System.out.println(
-                String.format("%s: %s, %s칼로리, 날짜: %s", a[0], a[1], a[2], a[3])));
-    }
-
-    public static void main(String[] args) {
-        ActivityLog log = new ActivityLog();
-
-        // 데이터 추가
-        log.addActivity("운동", "달리기", 300, LocalDate.now());
-        log.addActivity("식단", "샐러드", 200, LocalDate.now());
-
-        // 총 칼로리 계산
-        System.out.println("오늘 운동 소모 칼로리: " + log.getTotalCalories("운동", LocalDate.now()));
-        System.out.println("오늘 식단 섭취 칼로리: " + log.getTotalCalories("식단", LocalDate.now()));
-
-        // 배열로 저장 및 불러오기
-        String[][] savedData = log.saveToArray();
-        System.out.println("배열로 저장된 데이터:");
-        for (String[] activity : savedData) {
+        for (String[] activity : activities) {
             System.out.println(String.join(", ", activity));
         }
-
-        log.loadFromArray(savedData);
-        System.out.println("배열로부터 불러온 데이터:");
-        log.printActivities();
     }
 }
