@@ -26,14 +26,14 @@ public class HealthMetricSwing {
     // 데이터베이스 초기화
     private void initializeDatabase() {
         String createTableQuery = """
-            CREATE TABLE IF NOT EXISTS health_metrics (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                date TEXT NOT NULL,
-                bmi REAL NOT NULL,
-                body_fat REAL NOT NULL,
-                sleep_hours REAL NOT NULL
-            );
-        """;
+                    CREATE TABLE IF NOT EXISTS health_metrics (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        date TEXT NOT NULL,
+                        bmi REAL NOT NULL,
+                        body_fat REAL NOT NULL,
+                        sleep_hours REAL NOT NULL
+                    );
+                """;
 
         try (Statement statement = connection.createStatement()) {
             statement.execute(createTableQuery);
@@ -80,7 +80,7 @@ public class HealthMetricSwing {
             preparedStatement.executeUpdate();
 
             // 테이블 갱신
-            tableModel.addRow(new Object[]{date, bmi, bodyFatPercentage, sleepHours});
+            tableModel.addRow(new Object[] { date, bmi, bodyFatPercentage, sleepHours });
             JOptionPane.showMessageDialog(frame, "데이터가 저장되었습니다.");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -129,7 +129,7 @@ public class HealthMetricSwing {
         mainPanel.add(inputPanel, BorderLayout.NORTH);
 
         // 데이터 표시 테이블
-        tableModel = new DefaultTableModel(new String[]{"날짜", "BMI", "체지방률", "수면 시간"}, 0);
+        tableModel = new DefaultTableModel(new String[] { "날짜", "BMI", "체지방률", "수면 시간" }, 0);
         JTable table = new JTable(tableModel);
         JScrollPane tableScrollPane = new JScrollPane(table);
         tableScrollPane.setBorder(BorderFactory.createTitledBorder("저장된 데이터"));
@@ -205,7 +205,8 @@ public class HealthMetricSwing {
                     }
                 }
 
-                JOptionPane.showMessageDialog(frame, analysis.toString(), "건강 지표 분석 결과", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(frame, analysis.toString(), "건강 지표 분석 결과",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
