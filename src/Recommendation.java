@@ -1,5 +1,7 @@
+
+
 import java.sql.Connection;
-import java.sql.DriverManager;
+//import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
@@ -263,9 +265,7 @@ public class Recommendation{
     }
 
 
-    //사용자의 현상황에 적합한 제안 출력
-
-
+    
 
 }
 
