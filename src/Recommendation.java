@@ -27,7 +27,7 @@ public class Recommendation {
         this.maxWeight = idealWeightRange[1];
     }
 
-    private String generateRecommendation() {
+    String generateRecommendation() {
         StringBuilder recommendation = new StringBuilder();
         int bodyFatStatus = checkBodyFatPercentage();
         int weightStatus = checkIdealWeight();
