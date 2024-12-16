@@ -35,7 +35,7 @@ public class Recommendation extends Activity {
         this.maxWeight = idealWeightRange[1];
     }
 
-    @Override
+    /*@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -63,7 +63,7 @@ public class Recommendation extends Activity {
             String recommendation = generateRecommendation();
             recommendationTextView.setText(recommendation);
         });
-    }
+    }*/
 
     private String generateRecommendation() {
         // printRecommend 메서드를 String으로 변환하여 호출
