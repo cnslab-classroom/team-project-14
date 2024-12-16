@@ -173,6 +173,9 @@ public class User {
           String[] genderOptions = { "Male", "Female" };
           JComboBox<String> genderComboBox = new JComboBox<>(genderOptions);
           JButton submitButton = new JButton("정보 저장");
+          JButton backButton = new JButton("뒤로 가기");
+
+          backButton.addActionListener(e -> frame.dispose());
           
           // 컴포넌트 배치
           frame.add(nameLabel);
@@ -186,6 +189,7 @@ public class User {
           frame.add(genderLabel);
           frame.add(genderComboBox);
           frame.add(submitButton);
+          frame.add(backButton);
           
           // 프레임 설정
           frame.setSize(400, 300);
