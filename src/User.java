@@ -156,45 +156,54 @@ public class User {
     }
   }
 
-    class UserInfoScreen {
-      UserInfoScreen() {
-          JFrame frame = new JFrame("사용자 정보 입력");
-          frame.setLayout(new GridLayout(7, 2, 10, 10)); // 7행 2열의 GridLayout
-          // 입력 필드 및 라벨
-          JLabel nameLabel = new JLabel("이름:");
-          JTextField nameField = new JTextField();
-          JLabel ageLabel = new JLabel("나이(만):");
-          JTextField ageField = new JTextField();
-          JLabel heightLabel = new JLabel("키 (cm):");
-          JTextField heightField = new JTextField();
-          JLabel weightLabel = new JLabel("몸무게 (kg):");
-          JTextField weightField = new JTextField();
-          JLabel genderLabel = new JLabel("성별:");
-          String[] genderOptions = { "Male", "Female" };
-          JComboBox<String> genderComboBox = new JComboBox<>(genderOptions);
-          JButton submitButton = new JButton("정보 저장");
-          JButton backButton = new JButton("뒤로 가기");
+class UserInfoScreen {
+    UserInfoScreen() {
+        JFrame frame = new JFrame("사용자 정보 입력");
+        frame.setLayout(new BorderLayout(10, 10)); // 여백 추가
 
-          backButton.addActionListener(e -> frame.dispose());
-          
-          // 컴포넌트 배치
-          frame.add(nameLabel);
-          frame.add(nameField);
-          frame.add(ageLabel);
-          frame.add(ageField);
-          frame.add(heightLabel);
-          frame.add(heightField);
-          frame.add(weightLabel);
-          frame.add(weightField);
-          frame.add(genderLabel);
-          frame.add(genderComboBox);
-          frame.add(submitButton);
-          frame.add(backButton);
-          
-          // 프레임 설정
-          frame.setSize(400, 300);
-          frame.setLocationRelativeTo(null); // 화면 중앙에 위치
-          frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-          frame.setVisible(true);
-      }
+        // 중앙 패널: 입력 필드 및 버튼 배치
+        JPanel centerPanel = new JPanel(new GridLayout(7, 2, 10, 10));
+
+        // 입력 필드 및 라벨
+        JLabel nameLabel = new JLabel("이름:");
+        JTextField nameField = new JTextField();
+        JLabel ageLabel = new JLabel("나이(만):");
+        JTextField ageField = new JTextField();
+        JLabel heightLabel = new JLabel("키 (cm):");
+        JTextField heightField = new JTextField();
+        JLabel weightLabel = new JLabel("몸무게 (kg):");
+        JTextField weightField = new JTextField();
+        JLabel genderLabel = new JLabel("성별:");
+        String[] genderOptions = { "Male", "Female" };
+        JComboBox<String> genderComboBox = new JComboBox<>(genderOptions);
+        JButton submitButton = new JButton("정보 저장");
+        JButton backButton = new JButton("뒤로 가기");
+
+        backButton.addActionListener(e -> frame.dispose());
+
+        // 중앙 패널에 컴포넌트 추가
+        centerPanel.add(nameLabel);
+        centerPanel.add(nameField);
+        centerPanel.add(ageLabel);
+        centerPanel.add(ageField);
+        centerPanel.add(heightLabel);
+        centerPanel.add(heightField);
+        centerPanel.add(weightLabel);
+        centerPanel.add(weightField);
+        centerPanel.add(genderLabel);
+        centerPanel.add(genderComboBox);
+        centerPanel.add(submitButton);
+        centerPanel.add(backButton);
+
+        // 위쪽과 아래쪽에 여백 패널 추가
+        frame.add(new JPanel(), BorderLayout.NORTH); // 상단 여백
+        frame.add(centerPanel, BorderLayout.CENTER); // 중앙 패널
+        frame.add(new JPanel(), BorderLayout.SOUTH); // 하단 여백
+
+        // 프레임 설정
+        frame.setSize(400, 400); // 세로 길이 약간 확장
+        frame.setLocationRelativeTo(null); // 화면 중앙에 위치
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setVisible(true);
     }
+}

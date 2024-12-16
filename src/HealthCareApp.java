@@ -30,6 +30,7 @@ class IntroScreen {
     }
 }
 
+
 class LoginScreen {
     private static final Map<String, String> userDatabase = new HashMap<>();
 
@@ -59,13 +60,43 @@ class LoginScreen {
             new SignupScreen();
         });
 
-        JPanel panel = new JPanel();
-        panel.add(userLabel);
-        panel.add(userField);
-        panel.add(passLabel);
-        panel.add(passField);
-        panel.add(loginButton);
-        panel.add(signupButton);
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // 아이디 레이블과 필드
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        panel.add(userLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(userField, gbc);
+
+        // 비밀번호 레이블과 필드
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        panel.add(passLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(passField, gbc);
+
+        // 로그인, 회원가입 버튼
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.add(loginButton);
+        buttonPanel.add(signupButton);
+        panel.add(buttonPanel, gbc);
 
         frame.add(panel);
         frame.setSize(300, 200);
@@ -83,50 +114,78 @@ class LoginScreen {
     }
 }
 
+
+
 class SignupScreen {
-    SignupScreen() {
-        JFrame frame = new JFrame("회원가입");
-        JLabel nameLabel = new JLabel("이름:");
-        JLabel userLabel = new JLabel("아이디:");
-        JLabel passLabel = new JLabel("비밀번호:");
-        JTextField nameField = new JTextField(15);
-        JTextField userField = new JTextField(15);
-        JPasswordField passField = new JPasswordField(15);
-        JButton signupButton = new JButton("가입하기");
+  SignupScreen() {
+      JFrame frame = new JFrame("회원가입");
 
-        signupButton.addActionListener(e -> {
-            String name = nameField.getText();
-            String username = userField.getText();
-            String password = String.valueOf(passField.getPassword());
+      JLabel userLabel = new JLabel("아이디:");
+      JLabel passLabel = new JLabel("비밀번호:");
+      JTextField userField = new JTextField(15);
+      JPasswordField passField = new JPasswordField(15);
+      JButton signupButton = new JButton("가입하기");
 
-            if (username.isEmpty() || password.isEmpty() || name.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "모든 필드를 채워주세요.");
-            } else if (LoginScreen.isUserExists(username)) {
-                JOptionPane.showMessageDialog(frame, "이미 존재하는 아이디입니다.");
-            } else {
-                LoginScreen.registerUser(username, password);
-                JOptionPane.showMessageDialog(frame, "회원가입 성공! 로그인 화면으로 이동합니다.");
-                frame.dispose();
-                new LoginScreen();
-            }
-        });
+      signupButton.addActionListener(e -> {
+          String username = userField.getText();
+          String password = String.valueOf(passField.getPassword());
 
-        JPanel panel = new JPanel();
-        panel.add(nameLabel);
-        panel.add(nameField);
-        panel.add(userLabel);
-        panel.add(userField);
-        panel.add(passLabel);
-        panel.add(passField);
-        panel.add(signupButton);
+          if (username.isEmpty() || password.isEmpty()) {
+              JOptionPane.showMessageDialog(frame, "모든 필드를 채워주세요.");
+          } else if (LoginScreen.isUserExists(username)) {
+              JOptionPane.showMessageDialog(frame, "이미 존재하는 아이디입니다.");
+          } else {
+              LoginScreen.registerUser(username, password);
+              JOptionPane.showMessageDialog(frame, "회원가입 성공! 로그인 화면으로 이동합니다.");
+              frame.dispose();
+              new LoginScreen();
+          }
+      });
 
-        frame.add(panel);
-        frame.setSize(300, 250);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null); // 화면 중앙에 위치
-        frame.setVisible(true);
-    }
+      // Set up the layout
+      JPanel panel = new JPanel(new GridBagLayout());
+      GridBagConstraints gbc = new GridBagConstraints();
+      gbc.insets = new Insets(10, 10, 10, 10);
+      gbc.fill = GridBagConstraints.HORIZONTAL;
+
+      // 아이디 라벨 및 필드
+      gbc.gridx = 0;
+      gbc.gridy = 0;
+      panel.add(userLabel, gbc);
+
+      gbc.gridx = 1;
+      panel.add(userField, gbc);
+
+      // 비밀번호 라벨 및 필드
+      gbc.gridx = 0;
+      gbc.gridy = 1;
+      panel.add(passLabel, gbc);
+
+      gbc.gridx = 1;
+      panel.add(passField, gbc);
+
+      // 가입하기 버튼
+      gbc.gridx = 0;
+      gbc.gridy = 2;
+      gbc.gridwidth = 2;
+      gbc.anchor = GridBagConstraints.CENTER;
+      panel.add(signupButton, gbc);
+
+      // Add panel to frame
+      frame.add(panel);
+      frame.setSize(300, 200);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      frame.setLocationRelativeTo(null); // Center the frame on the screen
+      frame.setVisible(true);
+  }
+
+  public static void main(String[] args) {
+      new SignupScreen();
+  }
 }
+
+
+
 
 class MainMenuScreen {
     MainMenuScreen(String username) {
@@ -140,6 +199,15 @@ class MainMenuScreen {
         
         // "사용자 정보 입력" 버튼 클릭 시 UserInfoScreen으로 이동
         userInfoButton.addActionListener(e -> new UserInfoScreen());
+
+        // "건강 지표 분석" 버튼 클릭 시 HealthMetricSwing 화면 호출
+        healthAnalysisButton.addActionListener(null);
+
+        // "운동 및 식단 기록" 버튼 클릭 시 HealthMetricSwing 화면 호출
+        recordButton.addActionListener(null);
+
+        // "운동 및 식단 추천" 버튼 클릭 시 HealthMetricSwing 화면 호출
+        recommendationButton.addActionListener(null);
 
         frame.add(userInfoButton);
         frame.add(healthAnalysisButton);
