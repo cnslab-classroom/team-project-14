@@ -171,13 +171,13 @@ public class HealthMetric {
     // 메인 실행
     public static void main(String[] args) {
         // User 객체 생성
-        User user = new User("홍길동", 25, 175.0, 70.0, "male");
+        User user = new User("홍길동", 25, 180.0, 100.0, "male");
         HealthMetric healthMetric = new HealthMetric();
 
         // 예시 데이터
         String date = "2024-12-17";
-        double height = 1.75; // m
-        double weight = 70.0; // kg
+        double height = 1.80; // m
+        double weight = 100.0; // kg
         int age = 25;
         String gender = "male";
         String sleepTime = "22:00";

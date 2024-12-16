@@ -6,10 +6,10 @@ public class ActivityLogScreen {
     private ArrayList<String> activityLogs = new ArrayList<>();
     private ActivityLog activityLog;
 
-    public ActivityLogScreen(String username, ActivityLog activityLog) {
+    public ActivityLogScreen(User user, ActivityLog activityLog) {
         this.activityLog = activityLog;
 
-        JFrame frame = new JFrame("운동 및 식단 기록 - " + username);
+        JFrame frame = new JFrame("운동 및 식단 기록 - " + user);
         frame.setLayout(new BorderLayout());
 
         JLabel titleLabel = new JLabel("운동 및 식단 기록", SwingConstants.CENTER);
@@ -66,8 +66,8 @@ public class ActivityLogScreen {
             String dinner = dinnerField.getText();
 
             // ActivityLog에 기록 추가
-            activityLog.addActivity(new User(username), activityType, name, date);
-            activityLog.addDiet(new User(username), breakfast, lunch, dinner, date);
+            activityLog.addActivity(user, activityType, name, date);
+            activityLog.addDiet(user, breakfast, lunch, dinner, date);
 
             JOptionPane.showMessageDialog(frame, "기록이 저장되었습니다.");
         });

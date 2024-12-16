@@ -3,44 +3,43 @@ import javax.swing.*;
 import java.awt.*;
 
 public class HealthMetricSwing {
+    public static void showHealthAnalysis(User user) {
+        // 사용자 데이터를 가져옴
+        double height = user.getHeight();
+        double weight = user.getWeight();
+        int age = user.getAge();
+        String gender = user.getGender();
 
-    public static void showHealthAnalysis(double height, double weight, int age, String gender) {
+        // HealthMetric 객체를 통해 BMI와 체지방률 계산
+        double bmi = user.getBMI();
+        double bodyFatPercentage = user.getBodyFatPercentage();
+
+        // 결과를 표시할 새로운 창 생성
         JFrame frame = new JFrame("건강 지표 분석");
-        JPanel panel = new JPanel(new GridLayout(3, 1, 10, 10));
+        frame.setLayout(new GridLayout(4, 1, 10, 10));
 
-        double bmi = calculateBMI(weight, height);
-        String bmiCategory = (bmi < 18.5) ? "저체중" : (bmi < 25) ? "정상" : "과체중";
+        JLabel bmiLabel = new JLabel("BMI: " + String.format("%.2f", bmi), JLabel.CENTER);
+        JLabel bodyFatLabel = new JLabel("체지방률: " + String.format("%.2f", bodyFatPercentage) + "%", JLabel.CENTER);
 
-        double bodyFat = calculateBodyFatPercentage(bmi, age, gender);
-        String bodyFatCategory = (bodyFat < 10) ? "적음" : (bodyFat <= 20) ? "보통" : "높음";
+        double[] idealWeightRange = user.calculateIdealWeightRange();
+        JLabel idealWeightLabel = new JLabel(
+                "권장 체중 범위: " + String.format("%.2f", idealWeightRange[0]) + "kg ~ "
+                        + String.format("%.2f", idealWeightRange[1]) + "kg",
+                JLabel.CENTER);
 
-        JLabel bmiLabel = new JLabel("BMI: " + String.format("%.2f", bmi) + " (" + bmiCategory + ")");
-        JLabel bodyFatLabel = new JLabel("체지방률: " + String.format("%.2f", bodyFat) + "% (" + bodyFatCategory + ")");
+        JButton backButton = new JButton("뒤로 가기");
+        backButton.addActionListener(e -> frame.dispose());
 
-        panel.add(bmiLabel);
-        panel.add(bodyFatLabel);
+        // 프레임에 컴포넌트 추가
+        frame.add(bmiLabel);
+        frame.add(bodyFatLabel);
+        frame.add(idealWeightLabel);
+        frame.add(backButton);
 
-        JButton closeButton = new JButton("닫기");
-        closeButton.addActionListener(e -> frame.dispose());
-        panel.add(closeButton);
-
-        frame.add(panel);
+        // 프레임 설정
         frame.setSize(400, 300);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setVisible(true);
-    }
-
-    private static double calculateBMI(double weight, double heightInCm) {
-        double heightInMeters = heightInCm / 100.0;
-        return weight / (heightInMeters * heightInMeters);
-    }
-
-    private static double calculateBodyFatPercentage(double bmi, int age, String gender) {
-        if ("남".equals(gender)) {
-            return (1.20 * bmi) + (0.23 * age) - 16.2;
-        } else {
-            return (1.20 * bmi) + (0.23 * age) - 5.4;
-        }
     }
 }

@@ -13,7 +13,7 @@ public class HealthCareApp {
 
 class IntroScreen {
     IntroScreen() {
-        JFrame frame = new JFrame("헬스케어 앱");
+        JFrame frame = new JFrame("건강관리 프로그램");
         JLabel label = new JLabel("Welcome to HealthCare App!", SwingConstants.CENTER);
         label.setFont(label.getFont().deriveFont(20.0f));
 
@@ -50,7 +50,9 @@ class LoginScreen {
             if (userDatabase.containsKey(username) && userDatabase.get(username).equals(password)) {
                 JOptionPane.showMessageDialog(frame, "로그인 성공!");
                 frame.dispose();
-                new MainMenuScreen(username);
+                // 로그인 성공 후 User 객체 생성
+                User user = new User(username, 25, 170.0, 70.0, "Male"); // 예시: 실제로는 DB에서 정보 불러오기
+                new MainMenuScreen(user); // MainMenuScreen에 User 객체 전달
             } else {
                 JOptionPane.showMessageDialog(frame, "로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
             }
@@ -184,8 +186,8 @@ class SignupScreen {
 }
 
 class MainMenuScreen {
-    MainMenuScreen(String username) {
-        JFrame frame = new JFrame("메인 메뉴 - " + username);
+    MainMenuScreen(User user) {
+        JFrame frame = new JFrame("메인 메뉴 - " + user);
         frame.setLayout(new GridLayout(5, 1, 10, 10)); // 4 -> 5로 변경하여 BMI 버튼 추가
 
         JButton userInfoButton = new JButton("사용자 정보 입력");
@@ -199,7 +201,7 @@ class MainMenuScreen {
         ActivityLog activityLog = new ActivityLog(); // ActivityLog 객체 생성
 
         // "운동 및 식단 기록" 버튼 클릭 시 ActivityLogScreen으로 이동
-        recordButton.addActionListener(e -> new ActivityLogScreen(username, activityLog));
+        recordButton.addActionListener(e -> new ActivityLogScreen(user, activityLog));
 
         frame.add(userInfoButton);
         frame.add(healthAnalysisButton);
