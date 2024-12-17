@@ -186,6 +186,7 @@ class SignupScreen {
 }
 
 class MainMenuScreen {
+    private Recommendation recommendation;
     MainMenuScreen(User user) {
         JFrame frame = new JFrame("메인 메뉴 - " + user);
         frame.setLayout(new GridLayout(5, 1, 10, 10)); // 4 -> 5로 변경하여 BMI 버튼 추가
@@ -203,6 +204,14 @@ class MainMenuScreen {
         // "운동 및 식단 기록" 버튼 클릭 시 ActivityLogScreen으로 이동
         recordButton.addActionListener(e -> new ActivityLogScreen(user, activityLog));
 
+        recommendationButton.addActionListener(e -> {
+            // Recommendation 객체 생성
+            
+            new RecommendationGUI(recommendation);
+        });
+
+
+
         frame.add(userInfoButton);
         frame.add(healthAnalysisButton);
         frame.add(recordButton);
@@ -214,3 +223,71 @@ class MainMenuScreen {
         frame.setVisible(true);
     }
 }
+
+
+class RecommendationGUI {
+    private Recommendation recommendation;
+
+    public RecommendationGUI(Recommendation recommendation) {
+        this.recommendation = recommendation;
+        createAndShowGUI();
+    }
+
+    private void createAndShowGUI() {
+        JFrame frame = new JFrame("Health Recommendation System");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 400);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+
+        JTextArea outputArea = new JTextArea();
+        outputArea.setEditable(false);
+        outputArea.setLineWrap(true);
+        outputArea.setWrapStyleWord(true);
+        outputArea.setText("Welcome! Use the buttons below to generate reports or view recommendations.");
+
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JButton recommendationButton = new JButton("View Recommendation");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        buttonPanel.add(recommendationButton, gbc);
+
+        JButton weeklyReportButton = new JButton("Generate Weekly Report");
+        gbc.gridx = 1;
+        buttonPanel.add(weeklyReportButton, gbc);
+
+        JButton monthlyReportButton = new JButton("Generate Monthly Report");
+        gbc.gridx = 2;
+        buttonPanel.add(monthlyReportButton, gbc);
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Add action listeners
+        recommendationButton.addActionListener(e -> {
+            String result = recommendation.generateRecommendation();
+            outputArea.setText(result);
+        });
+
+        weeklyReportButton.addActionListener(e -> {
+            String result = recommendation.generateWeeklyReportFromStartOfMonth();
+            outputArea.setText(result);
+        });
+
+        monthlyReportButton.addActionListener(e -> {
+            String result = recommendation.generateMonthlyReport();
+            outputArea.setText(result);
+        });
+
+        frame.add(panel);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+} 
