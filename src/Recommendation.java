@@ -1,28 +1,26 @@
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Recommendation {
 
-    private Connection connection;
+   
     private User user;
-    private HealthMetric healthMetric;
+    
     private ActivityLog activityLog;
 
     private double[] idealWeightRange;
     private double minWeight;
     private double maxWeight;
 
-    public Recommendation(User user, ActivityLog activityLog, HealthMetric healthMetric) {
+    public Recommendation(User user, ActivityLog activityLog) {
         this.user = user;
         this.activityLog = activityLog;
-        this.healthMetric = healthMetric;
+     
 
         // 권장 몸무게 범위 계산
         this.idealWeightRange = user.calculateIdealWeightRange();
@@ -53,118 +51,64 @@ public class Recommendation {
         return recommendation.toString();
     }
 
-    private void initializeDatabase() {
-        String createTableQuery = """
-                    CREATE TABLE IF NOT EXISTS health_metrics (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        date TEXT NOT NULL,
-                        bmi REAL NOT NULL,
-                        body_fat REAL NOT NULL,
-                        sleep_hours REAL NOT NULL
-                    );
-                """;
 
-        try (Statement statement = connection.createStatement()) {
-            statement.execute(createTableQuery);
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public String generateWeeklyReport() {
+        List<String[]> activities = activityLog.getActivities(); // 모든 기록을 가져옴
+        Map<String, List<String>> groupedRecords = new TreeMap<>(); // 날짜별 기록을 저장하기 위한 Map
+        int[] weekRanges = {7, 14, 21, 28}; // 주간 범위의 끝 숫자 설정
+    
+        // 날짜별로 기록 분류
+        for (String[] activity : activities) {
+            String date = (activity[0].equals("식단")) ? activity[3] : activity[2]; // 식단 날짜는 activity[3], 운동 날짜는 activity[2]
+            groupedRecords.putIfAbsent(date, new ArrayList<>());
+    
+            if (activity[0].equals("식단")) { // 식단 기록
+                groupedRecords.get(date).add(String.format("  - 아침: %s - 점심: %s - 저녁: %s", activity[1], activity[2], activity[6]));
+            } else { // 운동 기록
+                groupedRecords.get(date).add(String.format("  - 운동 이름(운동 종류): %s (%s)", activity[1], activity[0]));
+            }
         }
-    }
-
-    public String generateWeeklyReportFromStartOfMonth() {
-        StringBuilder weeklyReport = new StringBuilder("===== 주간 리포트 =====\n");
-        LocalDate startDate = LocalDate.now().withDayOfMonth(1);
-        LocalDate endDate = startDate.plusDays(7);
     
-        // HealthMetric 데이터 추가
-        String query = """
-            SELECT date, bmi, body_fat, sleep_hours
-            FROM health_metrics
-            WHERE date >= ? AND date < ?
-            ORDER BY date ASC;
-            """;
+        // 가장 최근 완성된 주간 리포트를 찾기
+        StringBuilder report = new StringBuilder("===== 주간 리포트 =====\n");
+        boolean reportGenerated = false;
     
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, startDate.toString());
-            preparedStatement.setString(2, endDate.toString());
-            ResultSet resultSet = preparedStatement.executeQuery();
+        for (int i = weekRanges.length - 1; i >= 0; i--) {
+            int range = weekRanges[i];
+            List<String> selectedDates = new ArrayList<>();
     
-            int recordCount = 0;
-            while (resultSet.next()) {
-                recordCount++;
-                weeklyReport.append(String.format("날짜: %s, BMI: %.2f, 체지방률: %.2f%%, 수면 시간: %.2f시간\n",
-                        resultSet.getString("date"),
-                        resultSet.getDouble("bmi"),
-                        resultSet.getDouble("body_fat"),
-                        resultSet.getDouble("sleep_hours")));
-            }
-    
-            if (recordCount < 7) {
-                return "주간 리포트를 생성할 데이터가 부족합니다 (7일 필요).\n";
-            }
-    
-            // ActivityLog 데이터 추가
-            weeklyReport.append("\n--- 활동 기록 ---\n");
-            for (String[] activity : activityLog.getActivities()) {
-                LocalDate activityDate = LocalDate.parse(activity[2]);
-                if (!activityDate.isBefore(startDate) && activityDate.isBefore(endDate)) {
-                    weeklyReport.append(String.format("날짜: %s - 활동 유형: %s, 이름: %s\n",
-                            activity[2], activity[0], activity[1]));
+            // 해당 주차 날짜만 선택
+            for (String date : groupedRecords.keySet()) {
+                int day = Integer.parseInt(date.substring(8));
+                if (day <= range) {
+                    selectedDates.add(date);
                 }
             }
     
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return "주간 리포트 생성 중 오류가 발생했습니다.";
-        }
-    
-        return weeklyReport.toString();
-    }
-    
-
-public String generateMonthlyReport() {
-    StringBuilder monthlyReport = new StringBuilder("===== 월간 리포트 =====\n");
-    LocalDate startDate = LocalDate.now().withDayOfMonth(1);
-    LocalDate endDate = startDate.plusMonths(1).withDayOfMonth(1);
-
-    // HealthMetric 데이터 추가
-    String query = """
-            SELECT date, bmi, body_fat, sleep_hours
-            FROM health_metrics
-            WHERE date >= ? AND date < ?
-            ORDER BY date ASC;
-            """;
-
-    try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-        preparedStatement.setString(1, startDate.toString());
-        preparedStatement.setString(2, endDate.toString());
-        ResultSet resultSet = preparedStatement.executeQuery();
-
-        while (resultSet.next()) {
-            monthlyReport.append(String.format("날짜: %s, BMI: %.2f, 체지방률: %.2f%%, 수면 시간: %.2f시간\n",
-                    resultSet.getString("date"),
-                    resultSet.getDouble("bmi"),
-                    resultSet.getDouble("body_fat"),
-                    resultSet.getDouble("sleep_hours")));
-        }
-
-        // ActivityLog 데이터 추가
-        monthlyReport.append("\n--- 활동 기록 ---\n");
-        for (String[] activity : activityLog.getActivities()) {
-            LocalDate activityDate = LocalDate.parse(activity[2]);
-            if (!activityDate.isBefore(startDate) && activityDate.isBefore(endDate)) {
-                monthlyReport.append(String.format("날짜: %s - 활동 유형: %s, 이름: %s\n",
-                        activity[2], activity[0], activity[1]));
+            if (selectedDates.size() == range) { // 해당 주차의 모든 데이터를 가져왔을 때만 리포트 생성
+                for (String date : selectedDates) {
+                    report.append(String.format("날짜: %s\n", date));
+                    for (String detail : groupedRecords.get(date)) {
+                        report.append(detail).append("\n");
+                    }
+                }
+                reportGenerated = true;
+                break; // 가장 최근 완성된 주간 리포트만 출력
             }
         }
-
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return "월간 리포트 생성 중 오류가 발생했습니다.";
+    
+        if (!reportGenerated) {
+            return "아직 주간 리포트를 생성할 데이터가 부족합니다. 모든 데이터를 입력하세요.";
+        }
+    
+        return report.toString();
     }
+    
 
-    return monthlyReport.toString();
-}
+    
+    
+    
+    
 
 
     
@@ -228,15 +172,65 @@ public String generateMonthlyReport() {
         }
     }
 
-
-    public void debugLogs() {
-        System.out.println("===== Debugging ActivityLog =====");
-        for (String[] activity : activityLog.getActivities()) {
-            System.out.println(String.join(", ", activity));
+    private Map<LocalDate, List<String[]>> groupActivitiesByDate(List<String[]> activities) {
+        Map<LocalDate, List<String[]>> grouped = new TreeMap<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    
+        for (String[] activity : activities) {
+            // activity[2]는 날짜 (예: "2024-12-01")입니다.
+            LocalDate date = LocalDate.parse(activity[2], formatter);
+            grouped.computeIfAbsent(date, k -> new ArrayList<>()).add(activity);
         }
     
-        System.out.println("\n===== Debugging HealthMetric Database =====");
-        healthMetric.printAllRecords();
+        return grouped;
     }
+    
+    public String debugActivities() {
+        StringBuilder debugLog = new StringBuilder("===== Debugging Activities =====\n");
+        for (String[] activity : activityLog.getActivities()) {
+            debugLog.append(String.format("Type: %s, Name: %s, Date: %s\n", activity[0], activity[1], activity[2]));
+        }
+        return debugLog.toString();
+    }
+
+    public String generateDailySummary() {
+        List<String[]> activities = activityLog.getActivities(); // 모든 기록을 가져옴
+        Map<String, StringBuilder> groupedRecords = new TreeMap<>(); // 날짜별 기록을 저장하기 위한 Map
+    
+        // 날짜별로 기록 분류
+        for (String[] activity : activities) {
+            String date = (activity[0].equals("식단")) ? activity[3] : activity[2]; // 식단 날짜는 activity[3], 운동 날짜는 activity[2]
+            groupedRecords.putIfAbsent(date, new StringBuilder());
+    
+            if (activity[0].equals("식단")) { // 식단 기록
+                groupedRecords.get(date).append(String.format(
+                    "아침: %s - 점심: %s - 저녁: %s\n", activity[1], activity[2], activity[6]
+                ));
+            } else { // 운동 기록
+                groupedRecords.get(date).append(String.format(
+                    "운동 이름(운동 종류): %s (%s)\n", activity[1], activity[0]
+                ));
+            }
+        }
+    
+        // 최종 출력 문자열 생성
+        StringBuilder result = new StringBuilder("===== 월간 리포트 =====\n");
+        for (Map.Entry<String, StringBuilder> entry : groupedRecords.entrySet()) {
+            result.append(String.format("날짜: %s\n", entry.getKey()));
+            result.append(entry.getValue());
+            result.append("\n");
+        }
+    
+        if (result.toString().equals("===== 월간 리포트 =====\n")) {
+            return "아직 입력된 기록이 없습니다.";
+        }
+    
+        return result.toString();
+    }
+    
+    
+
+
+    
     
 }

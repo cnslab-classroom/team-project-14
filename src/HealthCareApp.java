@@ -204,7 +204,7 @@ class MainMenuScreen {
         ActivityLog activityLog = new ActivityLog();
 
         // Recommendation 객체 초기화
-        recommendation = new Recommendation(user, activityLog, healthMetric);
+        recommendation = new Recommendation(user, activityLog);
 
         // 버튼 액션 설정
         userInfoButton.addActionListener(e -> new UserInfoScreen(user));
@@ -235,7 +235,7 @@ class MainMenuScreen {
         outputArea.setEditable(false);
         outputArea.setLineWrap(true);
         outputArea.setWrapStyleWord(true);
-        outputArea.setText("안녕하세요! 하단의 버튼을 눌러 리포트를 확인하세요.");
+        outputArea.setText("안녕하세요! 목적에 맞게 하단의 버튼 중 하나를 클릭해주세요!");
     
         JScrollPane scrollPane = new JScrollPane(outputArea);
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -245,29 +245,47 @@ class MainMenuScreen {
         // Buttons
         JButton recommendationButton = new JButton("운동 및 식단 추천");
         JButton weeklyReportButton = new JButton("주간 리포트");
-        JButton monthlyReportButton = new JButton("월간 리포트");
+        
     
         // Button Actions
         recommendationButton.addActionListener(e -> {
             String result = recommendation.generateRecommendation();
             outputArea.setText(result);
         });
-    
+
+       
+
         weeklyReportButton.addActionListener(e -> {
-            recommendation.debugLogs(); // 디버깅 로그 출력
-            String result = recommendation.generateWeeklyReportFromStartOfMonth();
+            String result = recommendation.generateWeeklyReport();
             outputArea.setText(result);
         });
         
-        monthlyReportButton.addActionListener(e -> {
-            String result = recommendation.generateMonthlyReport();
+        
+
+
+        JButton dailySummaryButton = new JButton("월간 리포트");
+        dailySummaryButton.addActionListener(e -> {
+            String result = recommendation.generateDailySummary();
             outputArea.setText(result);
         });
+        
+        buttonPanel.add(dailySummaryButton);
+
+
+
+        
+        
+        
+        
+        
+        
     
+       
+        
         // Add buttons to the panel
         buttonPanel.add(recommendationButton);
         buttonPanel.add(weeklyReportButton);
-        buttonPanel.add(monthlyReportButton);
+        
     
         panel.add(buttonPanel, BorderLayout.SOUTH);
     
