@@ -35,7 +35,7 @@ public class User {
         this.activityLog = new ActivityLog(); // ActivityLog 객체 초기화
     }
 
-    public User(User user) {
+    public User(String username) {
         this.userId = userId;
         this.exerciseLog = new ArrayList<>();
         this.dietLog = new ArrayList<>();
@@ -141,10 +141,10 @@ class UserInfoScreen {
     UserInfoScreen() {
         JFrame frame = new JFrame("사용자 정보 입력");
         frame.setLayout(new BorderLayout(10, 10)); // 여백 추가
-        
+
         // 중앙 패널: 입력 필드 및 버튼 배치
         JPanel centerPanel = new JPanel(new GridLayout(7, 2, 10, 10));
-        
+
         // 입력 필드 및 라벨
         JLabel nameLabel = new JLabel("이름:");
         JTextField nameField = new JTextField();

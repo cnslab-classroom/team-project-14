@@ -8,25 +8,6 @@ public class ActivityLog {
         this.activities = new ArrayList<>();
     }
 
-    public void addHealthMetric(User user, String date) {
-        if (user.getHealthMetric() == null) {
-            System.out.println("HealthMetric 정보가 없습니다.");
-            return;
-        }
-        double bmi = user.getHealthMetric().getBmi();
-        double bodyFatPercentage = user.getHealthMetric().getBodyFatPercentage();
-        double sleepHours = user.getHealthMetric().getSleepHours();
-
-        activities.add(new String[] {
-                "건강",
-                "BMI: " + bmi + ", 체지방률: " + bodyFatPercentage + "%, 수면시간: " + sleepHours + "시간",
-                "",
-                date,
-                user.getName(),
-                user.getUserId()
-        });
-    }
-
     public void addActivity(User user, String type, String name, String date) {
         activities.add(new String[] {
                 type,
