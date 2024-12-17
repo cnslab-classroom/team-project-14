@@ -1,4 +1,3 @@
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -14,13 +13,19 @@ public class HealthMetricSwing {
         double bmi = user.getBMI();
         double bodyFatPercentage = user.getBodyFatPercentage();
 
+        // 상태를 판단하는 메서드 호출
+        String bmiStatus = getBmiStatus(bmi);
+        String bodyFatStatus = getBodyFatStatus(bodyFatPercentage, gender);
+
         // 결과를 표시할 새로운 창 생성
         JFrame frame = new JFrame("건강 지표 분석");
-        frame.setLayout(new GridLayout(4, 1, 10, 10));
+        frame.setLayout(new GridLayout(5, 1, 10, 10));
 
-        JLabel bmiLabel = new JLabel("BMI: " + String.format("%.2f", bmi), JLabel.CENTER);
-        JLabel bodyFatLabel = new JLabel("체지방률: " + String.format("%.2f", bodyFatPercentage) + "%", JLabel.CENTER);
+        // BMI 및 체지방률과 함께 상태 표시
+        JLabel bmiLabel = new JLabel("BMI: " + String.format("%.2f", bmi) + " (" + bmiStatus + ")", JLabel.CENTER);
+        JLabel bodyFatLabel = new JLabel("체지방률: " + String.format("%.2f", bodyFatPercentage) + "% (" + bodyFatStatus + ")", JLabel.CENTER);
 
+        // 권장 체중 범위 계산 및 표시
         double[] idealWeightRange = user.calculateIdealWeightRange();
         JLabel idealWeightLabel = new JLabel(
                 "권장 체중 범위: " + String.format("%.2f", idealWeightRange[0]) + "kg ~ "
@@ -42,4 +47,39 @@ public class HealthMetricSwing {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setVisible(true);
     }
+
+    // BMI 상태 판단 메서드
+    private static String getBmiStatus(double bmi) {
+        if (bmi < 18.5) {
+            return "저체중";
+        } else if (bmi < 24.9) {
+            return "정상";
+        } else if (bmi < 29.9) {
+            return "과체중";
+        } else {
+            return "비만";
+        }
+    }
+
+    // 체지방률 상태 판단 메서드
+    private static String getBodyFatStatus(double bodyFatPercentage, String gender) {
+        if (gender.equalsIgnoreCase("Male")) {
+            if (bodyFatPercentage < 6) {
+                return "적음";
+            } else if (bodyFatPercentage <= 24) {
+                return "보통";
+            } else {
+                return "많음";
+            }
+        } else { // Female
+            if (bodyFatPercentage < 16) {
+                return "적음";
+            } else if (bodyFatPercentage <= 30) {
+                return "보통";
+            } else {
+                return "많음";
+            }
+        }
+    }
 }
+
