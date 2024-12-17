@@ -38,20 +38,20 @@ public class HealthMetric {
         }
     }
 
-    // BMI 계산
+    // BMI 계산 메서드
     public double calculateBMI(double weight, double height) {
-        this.bmi = weight / (height * height);
-        return this.bmi;
+        if (height == 0) return 0; // 높이가 0일 때 예외 방지
+        double heightInMeters = height / 100.0; // 키를 미터 단위로 변환
+        return weight / (heightInMeters * heightInMeters);
     }
 
-    // 체지방률 계산
+    // 체지방률 계산 메서드 (남녀 기준에 따라 계산)
     public double calculateBodyFatPercentage(double bmi, int age, String gender) {
-        if (gender.equalsIgnoreCase("male")) {
-            this.bodyFatPercentage = (1.20 * bmi) + (0.23 * age) - 16.2;
-        } else {
-            this.bodyFatPercentage = (1.20 * bmi) + (0.23 * age) - 5.4;
+        if (gender.equalsIgnoreCase("Male")) {
+            return (1.20 * bmi) + (0.23 * age) - 16.2;
+        } else { // Female
+            return (1.20 * bmi) + (0.23 * age) - 5.4;
         }
-        return this.bodyFatPercentage;
     }
 
     // 수면 시간 계산
