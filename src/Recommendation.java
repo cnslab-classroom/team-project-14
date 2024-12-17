@@ -1,6 +1,7 @@
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
@@ -71,85 +72,73 @@ public class Recommendation {
     }
 
     public String generateWeeklyReportFromStartOfMonth() {
-    StringBuilder weeklyReport = new StringBuilder("===== 주간 리포트 =====\n");
-    String query = """
-            SELECT date, bmi, body_fat, sleep_hours
-            FROM health_metrics
-            WHERE date >= date('now', 'start of month')
-              AND date < date('now', 'start of month', '+7 days')
-            ORDER BY date ASC;
-            """;
-
-    try (Statement statement = connection.createStatement();
-         ResultSet resultSet = statement.executeQuery(query)) {
-
-        int recordCount = 0;
-        while (resultSet.next()) {
-            recordCount++;
-            weeklyReport.append(String.format("날짜: %s, BMI: %.2f, 체지방률: %.2f%%, 수면 시간: %.2f시간\n",
-                    resultSet.getString("date"),
-                    resultSet.getDouble("bmi"),
-                    resultSet.getDouble("body_fat"),
-                    resultSet.getDouble("sleep_hours")));
-        }
-
-        if (recordCount < 7) {
-            return "주간 리포트를 생성할 데이터가 부족합니다 (7일 필요).\n";
-        }
-
-        weeklyReport.append("\n--- 활동 기록 ---\n");
-        List<String[]> activities = activityLog.getActivities();
+        StringBuilder weeklyReport = new StringBuilder("===== 주간 리포트 =====\n");
         LocalDate startDate = LocalDate.now().withDayOfMonth(1);
         LocalDate endDate = startDate.plusDays(7);
-
-        for (String[] activity : activities) {
-            LocalDate activityDate = LocalDate.parse(activity[2]);
-            if (!activityDate.isBefore(startDate) && activityDate.isBefore(endDate)) {
-                weeklyReport.append(String.format("날짜: %s - 활동 유형: %s, 이름: %s\n",
-                        activity[2], activity[0], activity[1]));
+    
+        // HealthMetric 데이터 추가
+        String query = """
+            SELECT date, bmi, body_fat, sleep_hours
+            FROM health_metrics
+            WHERE date >= ? AND date < ?
+            ORDER BY date ASC;
+            """;
+    
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, startDate.toString());
+            preparedStatement.setString(2, endDate.toString());
+            ResultSet resultSet = preparedStatement.executeQuery();
+    
+            int recordCount = 0;
+            while (resultSet.next()) {
+                recordCount++;
+                weeklyReport.append(String.format("날짜: %s, BMI: %.2f, 체지방률: %.2f%%, 수면 시간: %.2f시간\n",
+                        resultSet.getString("date"),
+                        resultSet.getDouble("bmi"),
+                        resultSet.getDouble("body_fat"),
+                        resultSet.getDouble("sleep_hours")));
             }
+    
+            if (recordCount < 7) {
+                return "주간 리포트를 생성할 데이터가 부족합니다 (7일 필요).\n";
+            }
+    
+            // ActivityLog 데이터 추가
+            weeklyReport.append("\n--- 활동 기록 ---\n");
+            for (String[] activity : activityLog.getActivities()) {
+                LocalDate activityDate = LocalDate.parse(activity[2]);
+                if (!activityDate.isBefore(startDate) && activityDate.isBefore(endDate)) {
+                    weeklyReport.append(String.format("날짜: %s - 활동 유형: %s, 이름: %s\n",
+                            activity[2], activity[0], activity[1]));
+                }
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "주간 리포트 생성 중 오류가 발생했습니다.";
         }
-
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return "주간 리포트 생성 중 오류가 발생했습니다.";
+    
+        return weeklyReport.toString();
     }
-
-    return weeklyReport.toString();
-}
+    
 
 public String generateMonthlyReport() {
-    String today = LocalDate.now().toString();
-    String endOfMonthQuery = """
-            SELECT date('now', 'start of month', '+1 month', '-1 day') AS end_of_month;
-            """;
-
-    String endOfMonth = "";
-    try (Statement statement = connection.createStatement();
-         ResultSet resultSet = statement.executeQuery(endOfMonthQuery)) {
-        if (resultSet.next()) {
-            endOfMonth = resultSet.getString("end_of_month");
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return "월말 체크 중 오류 발생.";
-    }
-
-    if (!today.equals(endOfMonth)) {
-        return "월간 리포트는 월말에만 생성됩니다.\n";
-    }
-
     StringBuilder monthlyReport = new StringBuilder("===== 월간 리포트 =====\n");
+    LocalDate startDate = LocalDate.now().withDayOfMonth(1);
+    LocalDate endDate = startDate.plusMonths(1).withDayOfMonth(1);
+
+    // HealthMetric 데이터 추가
     String query = """
             SELECT date, bmi, body_fat, sleep_hours
             FROM health_metrics
-            WHERE date >= date('now', 'start of month')
-              AND date <= date('now', 'start of month', '+1 month', '-1 day')
+            WHERE date >= ? AND date < ?
             ORDER BY date ASC;
             """;
 
-    try (Statement statement = connection.createStatement();
-         ResultSet resultSet = statement.executeQuery(query)) {
+    try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+        preparedStatement.setString(1, startDate.toString());
+        preparedStatement.setString(2, endDate.toString());
+        ResultSet resultSet = preparedStatement.executeQuery();
 
         while (resultSet.next()) {
             monthlyReport.append(String.format("날짜: %s, BMI: %.2f, 체지방률: %.2f%%, 수면 시간: %.2f시간\n",
@@ -159,12 +148,9 @@ public String generateMonthlyReport() {
                     resultSet.getDouble("sleep_hours")));
         }
 
+        // ActivityLog 데이터 추가
         monthlyReport.append("\n--- 활동 기록 ---\n");
-        List<String[]> activities = activityLog.getActivities();
-        LocalDate startDate = LocalDate.now().withDayOfMonth(1);
-        LocalDate endDate = startDate.plusMonths(1).withDayOfMonth(1);
-
-        for (String[] activity : activities) {
+        for (String[] activity : activityLog.getActivities()) {
             LocalDate activityDate = LocalDate.parse(activity[2]);
             if (!activityDate.isBefore(startDate) && activityDate.isBefore(endDate)) {
                 monthlyReport.append(String.format("날짜: %s - 활동 유형: %s, 이름: %s\n",
@@ -241,4 +227,16 @@ public String generateMonthlyReport() {
             return 3; // 체중 과다
         }
     }
+
+
+    public void debugLogs() {
+        System.out.println("===== Debugging ActivityLog =====");
+        for (String[] activity : activityLog.getActivities()) {
+            System.out.println(String.join(", ", activity));
+        }
+    
+        System.out.println("\n===== Debugging HealthMetric Database =====");
+        healthMetric.printAllRecords();
+    }
+    
 }
