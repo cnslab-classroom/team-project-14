@@ -4,6 +4,8 @@ import java.util.List;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class HealthCareApp {
     public static void main(String[] args) {
@@ -197,8 +199,11 @@ class MainMenuScreen {
         JButton recommendationButton = new JButton("운동 및 식단 추천");
 
         // "사용자 정보 입력" 버튼 클릭 시 UserInfoScreen으로 이동
-        userInfoButton.addActionListener(e -> new UserInfoScreen());
+        userInfoButton.addActionListener(e -> new UserInfoScreen(user));
 
+        // "건강 지표 분석" 버튼 클릭 시 HealthMetricSwing 화면 호출
+        healthAnalysisButton.addActionListener(e -> HealthMetricSwing.showHealthAnalysis(user));
+       
         ActivityLog activityLog = new ActivityLog(); // ActivityLog 객체 생성
 
         // "운동 및 식단 기록" 버튼 클릭 시 ActivityLogScreen으로 이동

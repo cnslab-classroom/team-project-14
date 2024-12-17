@@ -51,9 +51,8 @@ public class ActivityLogScreen {
 
         JButton saveButton = new JButton("기록 저장");
         JButton cancelButton = new JButton("취소");
-        JButton viewActivityButton = new JButton("운동 기록 확인");
-        JButton viewDietButton = new JButton("식단 기록 확인");
-        JButton viewHealthMetricsButton = new JButton("건강 지표 확인");
+        JButton viewActivityButton = new JButton("운동 확인");
+        JButton viewDietButton = new JButton("식단 확인");
 
         // 기록 저장 버튼의 이벤트 리스너
         saveButton.addActionListener(e -> {
@@ -66,8 +65,8 @@ public class ActivityLogScreen {
             String dinner = dinnerField.getText();
 
             // ActivityLog에 기록 추가
-            activityLog.addActivity(user, activityType, name, date);
-            activityLog.addDiet(user, breakfast, lunch, dinner, date);
+            activityLog.addActivity(new User(name), activityType, name, date);
+            activityLog.addDiet(new User(name), breakfast, lunch, dinner, date);
 
             JOptionPane.showMessageDialog(frame, "기록이 저장되었습니다.");
         });
@@ -88,9 +87,9 @@ public class ActivityLogScreen {
             // 운동 기록 확인 로직 추가
             StringBuilder activityRecords = new StringBuilder();
             for (String[] activity : activityLog.getActivities()) {
-                if (!activity[0].equals("식단") && !activity[0].equals("건강")) {
-                    activityRecords.append(
-                            String.format("날짜: %s - 운동 종류: %s - 운동 이름: %s\n", activity[2], activity[0], activity[1]));
+                if (!activity[0].equals("식단")) {
+                    activityRecords.append(String.format("날짜: %s 운동 이름(운동 종류): %s " + "(" + " %s" + ") \n", activity[2],
+                            activity[1], activity[0]));
                 }
             }
             JOptionPane.showMessageDialog(frame, activityRecords.toString(), "운동 기록", JOptionPane.INFORMATION_MESSAGE);
@@ -109,23 +108,10 @@ public class ActivityLogScreen {
             JOptionPane.showMessageDialog(frame, dietRecords.toString(), "식단 기록", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        // 건강 지표 확인 버튼의 이벤트 리스너
-        viewHealthMetricsButton.addActionListener(e -> {
-            // 건강 지표 확인 로직 추가
-            StringBuilder healthMetrics = new StringBuilder();
-            for (String[] activity : activityLog.getActivities()) {
-                if (activity[0].equals("건강")) {
-                    healthMetrics.append(activity[1]).append("\n");
-                }
-            }
-            JOptionPane.showMessageDialog(frame, healthMetrics.toString(), "건강 지표", JOptionPane.INFORMATION_MESSAGE);
-        });
-
         buttonPanel.add(saveButton);
         buttonPanel.add(cancelButton);
         buttonPanel.add(viewActivityButton);
         buttonPanel.add(viewDietButton);
-        buttonPanel.add(viewHealthMetricsButton);
 
         frame.add(buttonPanel, BorderLayout.SOUTH);
         frame.setSize(400, 400);

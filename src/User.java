@@ -35,7 +35,7 @@ public class User {
         this.activityLog = new ActivityLog(); // ActivityLog 객체 초기화
     }
 
-    public User(User user) {
+    public User(String username) {
         this.userId = userId;
         this.exerciseLog = new ArrayList<>();
         this.dietLog = new ArrayList<>();
@@ -138,9 +138,12 @@ public class User {
 class UserInfoScreen {
     private User user; // User 객체를 멤버 변수로 선언
 
-    UserInfoScreen() {
+    UserInfoScreen(User user) {
         JFrame frame = new JFrame("사용자 정보 입력");
-        frame.setLayout(new GridLayout(7, 2, 10, 10)); // 7행 2열의 GridLayout
+        frame.setLayout(new BorderLayout(10, 10)); // 여백 추가
+
+        // 중앙 패널: 입력 필드 및 버튼 배치
+        JPanel centerPanel = new JPanel(new GridLayout(7, 2, 10, 10));
 
         // 입력 필드 및 라벨
         JLabel nameLabel = new JLabel("이름:");
@@ -155,38 +158,47 @@ class UserInfoScreen {
         String[] genderOptions = { "Male", "Female" };
         JComboBox<String> genderComboBox = new JComboBox<>(genderOptions);
         JButton submitButton = new JButton("정보 저장");
+        JButton backButton = new JButton("뒤로 가기");
 
-        // 컴포넌트 배치
-        frame.add(nameLabel);
-        frame.add(nameField);
-        frame.add(ageLabel);
-        frame.add(ageField);
-        frame.add(heightLabel);
-        frame.add(heightField);
-        frame.add(weightLabel);
-        frame.add(weightField);
-        frame.add(genderLabel);
-        frame.add(genderComboBox);
-        frame.add(submitButton);
+        submitButton.addActionListener(e -> {
+            try {
+                // 사용자 정보 수정
+                user.setName(nameField.getText());
+                user.setAge(Integer.parseInt(ageField.getText()));
+                user.setHeight(Double.parseDouble(heightField.getText()));
+                user.setWeight(Double.parseDouble(weightField.getText()));
+                user.setGender((String) genderComboBox.getSelectedItem());
 
-        // 버튼 클릭 이벤트 처리
-        submitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String name = nameField.getText();
-                int age = Integer.parseInt(ageField.getText());
-                double height = Double.parseDouble(heightField.getText());
-                double weight = Double.parseDouble(weightField.getText());
-                String gender = (String) genderComboBox.getSelectedItem();
-
-                // User 객체 생성 후 값 설정
-                user = new User(name, age, height, weight, gender);
-                JOptionPane.showMessageDialog(frame, "정보 저장 완료!");
+                // 정보 저장 후 건강 지표 분석 화면으로 이동
+                frame.dispose();
+                HealthMetricSwing.showHealthAnalysis(user); // 수정된 user 객체 전달
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "올바른 값을 입력해주세요.", "입력 오류", JOptionPane.ERROR_MESSAGE);
             }
         });
+        backButton.addActionListener(e -> frame.dispose());
+
+        // 중앙 패널에 컴포넌트 추가
+        centerPanel.add(nameLabel);
+        centerPanel.add(nameField);
+        centerPanel.add(ageLabel);
+        centerPanel.add(ageField);
+        centerPanel.add(heightLabel);
+        centerPanel.add(heightField);
+        centerPanel.add(weightLabel);
+        centerPanel.add(weightField);
+        centerPanel.add(genderLabel);
+        centerPanel.add(genderComboBox);
+        centerPanel.add(submitButton);
+        centerPanel.add(backButton);
+
+        // 위쪽과 아래쪽에 여백 패널 추가
+        frame.add(new JPanel(), BorderLayout.NORTH); // 상단 여백
+        frame.add(centerPanel, BorderLayout.CENTER); // 중앙 패널
+        frame.add(new JPanel(), BorderLayout.SOUTH); // 하단 여백
 
         // 프레임 설정
-        frame.setSize(400, 300);
+        frame.setSize(400, 400); // 세로 길이 약간 확장
         frame.setLocationRelativeTo(null); // 화면 중앙에 위치
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setVisible(true);
