@@ -1,287 +1,236 @@
+
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Recommendation {
 
-    //외부 객체 클래스 
+   
     private User user;
-    private HealthMetric healthMetric;
+    
     private ActivityLog activityLog;
 
-    //운동한 시간
-    private double timeWeek;     
-    private double timeMonth;
+    private double[] idealWeightRange;
+    private double minWeight;
+    private double maxWeight;
 
-    //섭취한 칼로리
-    private double calorieWeek;
-    private double calorieMonth; 
-
-    //장기 데이터 저장소 
-    private List<String> weeklyReports = new ArrayList<>(); //주간 리포트
-    private List<String> monthlyReports = new ArrayList<>(); //월간 리포트 
-
-    //목표몸무게도 받아오기
-    //-> 목표 몸무게까지 얼마나 더 감량해야 하는지 표시하게 
-
-    //User 클래스에서 권장 몸무게 받아옴 
-    double[] idealWeightRange = user.calculateIdealWeightRange();
-    double minWeight = idealWeightRange[0];
-    double maxWeight = idealWeightRange[1];
-
-    
-    //생성자
-    public Recommendation(User user, ActivityLog activityLog, HealthMetric healthMetric) {
+    public Recommendation(User user, ActivityLog activityLog) {
         this.user = user;
         this.activityLog = activityLog;
-        this.healthMetric = healthMetric;
-        this.timeWeek = 0;
-        this.timeMonth = 0;
-        this.calorieWeek = 0;
-        this.calorieMonth = 0;
-    
+     
+
         // 권장 몸무게 범위 계산
         this.idealWeightRange = user.calculateIdealWeightRange();
         this.minWeight = idealWeightRange[0];
         this.maxWeight = idealWeightRange[1];
     }
+
+    String generateRecommendation() {
+        StringBuilder recommendation = new StringBuilder();
+        int bodyFatStatus = checkBodyFatPercentage();
+        int weightStatus = checkIdealWeight();
+
+        if (bodyFatStatus == 1 && weightStatus == 1) {
+            recommendation.append("감량이 필요합니다! 고강도 운동과 함께 저칼로리 식단을 유지하세요.\n");
+        } else if (bodyFatStatus == 2 && weightStatus == 2) {
+            recommendation.append("잘하고 있습니다! 현재 상태를 유지하기 위해 균형 잡힌 식단과 가벼운 운동을 병행하세요.\n");
+        } else if (bodyFatStatus == 3 && weightStatus == 3) {
+            recommendation.append("체중 증가가 필요합니다. 고단백 식단과 근력 운동을 추가하세요.\n");
+        } else if (bodyFatStatus == 2 && weightStatus == 1) {
+            recommendation.append("체지방률을 유지하며 체중을 줄여야 합니다. 유산소 운동과 근력 운동을 병행하세요.\n");
+        } else if (bodyFatStatus == 2 && weightStatus == 3) {
+            recommendation.append("체지방률을 유지하며 체중을 늘려야 합니다. 고칼로리 식단과 근력 운동을 병행하세요.\n");
+        } else if (bodyFatStatus == 1 && weightStatus == 2) {
+            recommendation.append("체지방을 줄이고 체중을 유지해야 합니다. 고단백 저탄수 식단과 고강도 운동을 병행하세요.\n");
+        } else if (bodyFatStatus == 3 && weightStatus == 1) {
+            recommendation.append("건강한 상태를 유지하고 있습니다. 현재 상태를 유지하기 위해 노력하세요!\n");
+        }
+        return recommendation.toString();
+    }
+
+
+    public String generateWeeklyReport() {
+        List<String[]> activities = activityLog.getActivities(); // 모든 기록을 가져옴
+        Map<String, List<String>> groupedRecords = new TreeMap<>(); // 날짜별 기록을 저장하기 위한 Map
+        int[] weekRanges = {7, 14, 21, 28}; // 주간 범위의 끝 숫자 설정
+    
+        // 날짜별로 기록 분류
+        for (String[] activity : activities) {
+            String date = (activity[0].equals("식단")) ? activity[3] : activity[2]; // 식단 날짜는 activity[3], 운동 날짜는 activity[2]
+            groupedRecords.putIfAbsent(date, new ArrayList<>());
+    
+            if (activity[0].equals("식단")) { // 식단 기록
+                groupedRecords.get(date).add(String.format("  - 아침: %s - 점심: %s - 저녁: %s", activity[1], activity[2], activity[6]));
+            } else { // 운동 기록
+                groupedRecords.get(date).add(String.format("  - 운동 이름(운동 종류): %s (%s)", activity[1], activity[0]));
+            }
+        }
+    
+        // 가장 최근 완성된 주간 리포트를 찾기
+        StringBuilder report = new StringBuilder("===== 주간 리포트 =====\n");
+        boolean reportGenerated = false;
+    
+        for (int i = weekRanges.length - 1; i >= 0; i--) {
+            int range = weekRanges[i];
+            List<String> selectedDates = new ArrayList<>();
+    
+            // 해당 주차 날짜만 선택
+            for (String date : groupedRecords.keySet()) {
+                int day = Integer.parseInt(date.substring(8));
+                if (day <= range) {
+                    selectedDates.add(date);
+                }
+            }
+    
+            if (selectedDates.size() == range) { // 해당 주차의 모든 데이터를 가져왔을 때만 리포트 생성
+                for (String date : selectedDates) {
+                    report.append(String.format("날짜: %s\n", date));
+                    for (String detail : groupedRecords.get(date)) {
+                        report.append(detail).append("\n");
+                    }
+                }
+                reportGenerated = true;
+                break; // 가장 최근 완성된 주간 리포트만 출력
+            }
+        }
+    
+        if (!reportGenerated) {
+            return "아직 주간 리포트를 생성할 데이터가 부족합니다. 모든 데이터를 입력하세요.";
+        }
+    
+        return report.toString();
+    }
+    
+
+    
+    
+    
     
 
 
-// 하루 기록 업데이트 -> ActivityLog 클래스로부터 받아와야
-public void updateDailyLog() {
-    LocalDate today = LocalDate.now();
-    double dailyCaloriesBurned = activityLog.getTotalCalories("운동", today);
-    double dailyCaloriesConsumed = activityLog.getTotalCalories("식단", today);
+    
+    public int checkBodyFatPercentage() {
+        int age = user.getAge();
+        double bodyFatPercentage = user.getBodyFatPercentage();
 
-    this.timeWeek += dailyCaloriesBurned / 100; // 예: 100칼로리당 1시간으로 가정
-    this.calorieWeek += dailyCaloriesConsumed;
-    this.timeMonth += dailyCaloriesBurned / 100;
-    this.calorieMonth += dailyCaloriesConsumed;
-}
-public void generateWeeklyReport() {
-    String report = String.format(
-        "%s 주간 리포트:\n- 총 운동 시간: %.2f시간\n- 총 섭취 칼로리: %.2fkcal",
-        LocalDate.now(), timeWeek, calorieWeek
-    );
-    weeklyReports.add(report);
-    resetWeeklyData();
-    System.out.println(report);
-}
-
-public void generateMonthlyReport() {
-    String report = String.format(
-        "%s 월간 리포트:\n- 총 운동 시간: %.2f시간\n- 총 섭취 칼로리: %.2fkcal",
-        LocalDate.now(), timeMonth, calorieMonth
-    );
-    monthlyReports.add(report);
-    resetMonthlyData();
-    System.out.println(report);
-}
-
-
-// 주간 리포트 저장
-private void saveWeeklyReport() {
-    String report = LocalDate.now() + " 주간 리포트: 총 운동 시간: " + timeWeek + "시간, 총 섭취 칼로리: " + calorieWeek + "kcal";
-    weeklyReports.add(report);
-}
-
-// 월간 리포트 저장
-private void saveMonthlyReport() {
-    String report = LocalDate.now() + " 월간 리포트: 총 운동 시간: " + timeMonth + "시간, 총 섭취 칼로리: " + calorieMonth + "kcal";
-    monthlyReports.add(report);
-}
-
-
-//주간 보고서
-public void weeklyReport()
-{
-    System.out.println("이번주 총 운동 시간은 " + timeWeek + "시간 입니다.");
-    System.out.println("이번주 총 섭취 칼로리는 " + calorieWeek + "kcal 입니다.");
-    printRecommend();
-    saveWeeklyReport();  // 저장
-    resetWeeklyData();   // 초기화
-}
-
-
-
-//월간 보고서 
-public void monthlyReport()
-{
-    System.out.println("이번달 총 운동 시간은 " + timeMonth + "시간 입니다.");
-    System.out.println("이번달 총 섭취 칼로리는 " + calorieMonth + "kcal 입니다.");
-    printRecommend();
-    saveMonthlyReport(); // 저장
-    resetMonthlyData();  // 초기화
-}
-
-// 주간 데이터 초기화
-private void resetWeeklyData() {
-    this.timeWeek = 0;
-    this.calorieWeek = 0;
-}
-
-// 월간 데이터 초기화
-private void resetMonthlyData() {
-    this.timeMonth = 0;
-    this.calorieMonth = 0;
-}
-
-// 연말 리포트 출력
-public void printYearlyReport() {
-    System.out.println("연간 주간 리포트:");
-    for (String report : weeklyReports) {
-        System.out.println(report);
-    }
-
-    System.out.println("\n연간 월간 리포트:");
-    for (String report : monthlyReports) {
-        System.out.println(report);
-    }
-}
-
-// 체지방률에 따라 성별별,나이별 높음 낮음 정상으로 구분 
-public int checkBodyFatPercentage() {
-    int age = user.getAge();
-    double bodyFatPercentage = user.calculateBodyFatPercentage();
-
-    if (user.getGender()=="male") { // 성별: 남성
-        if (age >= 18 && age <= 39) {
-            if (bodyFatPercentage > 20) {
-                return 1; // 체지방량 높음
-            } else if (bodyFatPercentage >= 9 && bodyFatPercentage <= 20) {
-                return 2; // 체지방량 정상
+        if (user.getGender().equals("male")) { // 성별: 남성
+            if (age >= 18 && age <= 39) {
+                if (bodyFatPercentage > 20) {
+                    return 1; // 체지방량 높음
+                } else if (bodyFatPercentage >= 9 && bodyFatPercentage <= 20) {
+                    return 2; // 체지방량 정상
+                } else {
+                    return 3; // 체지방량 낮음
+                }
+            } else if (age >= 40 && age <= 59) {
+                if (bodyFatPercentage > 22) {
+                    return 1; // 체지방량 높음
+                } else if (bodyFatPercentage >= 12 && bodyFatPercentage <= 22) {
+                    return 2; // 체지방량 정상
+                } else {
+                    return 3; // 체지방량 낮음
+                }
             } else {
-                return 3; // 체지방량 낮음
+                return 2; // 나이가 많으면 정상범위는 넓어진다.
             }
-        } else if (age >= 40 && age <= 59) {
-            if (bodyFatPercentage > 22) {
-                return 1; // 체지방량 높음
-            } else if (bodyFatPercentage >= 12 && bodyFatPercentage <= 22) {
-                return 2; // 체지방량 정상
+        } else if (user.getGender().equals("female")) { // 성별: 여성
+            if (age >= 18 && age <= 39) {
+                if (bodyFatPercentage > 32) {
+                    return 1; // 체지방량 높음
+                } else if (bodyFatPercentage >= 21 && bodyFatPercentage <= 32) {
+                    return 2; // 체지방량 정상
+                } else {
+                    return 3; // 체지방량 낮음
+                }
+            } else if (age >= 40 && age <= 59) {
+                if (bodyFatPercentage > 34) {
+                    return 1; // 체지방량 높음
+                } else if (bodyFatPercentage >= 23 && bodyFatPercentage <= 34) {
+                    return 2; // 체지방량 정상
+                } else {
+                    return 3; // 체지방량 낮음
+                }
             } else {
-                return 3; // 체지방량 낮음
-            }
-        } else if (age >= 60) {
-            if (bodyFatPercentage > 24) {
-                return 1; // 체지방량 높음
-            } else if (bodyFatPercentage >= 14 && bodyFatPercentage <= 24) {
-                return 2; // 체지방량 정상
-            } else {
-                return 3; // 체지방량 낮음
+                return 2; // 나이가 많으면 정상범위는 넓어진다.
             }
         }
-    } else if (user.getGender()=="female") { // 성별: 여성
-        if (age >= 18 && age <= 39) {
-            if (bodyFatPercentage > 30) {
-                return 1; // 체지방량 높음
-            } else if (bodyFatPercentage >= 19 && bodyFatPercentage <= 30) {
-                return 2; // 체지방량 정상
-            } else {
-                return 3; // 체지방량 낮음
-            }
-        } else if (age >= 40 && age <= 59) {
-            if (bodyFatPercentage > 32) {
-                return 1; // 체지방량 높음
-            } else if (bodyFatPercentage >= 21 && bodyFatPercentage <= 32) {
-                return 2; // 체지방량 정상
-            } else {
-                return 3; // 체지방량 낮음
-            }
-        } else if (age >= 60) {
-            if (bodyFatPercentage > 34) {
-                return 1; // 체지방량 높음
-            } else if (bodyFatPercentage >= 23 && bodyFatPercentage <= 34) {
-                return 2; // 체지방량 정상
-            } else {
-                return 3; // 체지방량 낮음
-            }
+        return 2;
+    }
+
+    public int checkIdealWeight() {
+        double weight = user.getWeight();
+
+        if (weight < minWeight) {
+            return 1; // 체중 부족
+        } else if (weight >= minWeight && weight <= maxWeight) {
+            return 2; // 체중 정상
+        } else {
+            return 3; // 체중 과다
         }
     }
 
-    return 0; // 기본값: 유효하지 않은 경우
-}
-
-
-//권장몸무게보다 현 사용자의 몸무게가 무거운지 가벼운지 일치하나 구분
-public int checkIdealWeight()
-{
+    private Map<LocalDate, List<String[]>> groupActivitiesByDate(List<String[]> activities) {
+        Map<LocalDate, List<String[]>> grouped = new TreeMap<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     
-
-    if(user.getWeight()>maxWeight)
-    {
-        return 1; //권장 몸무게보다 무거움 -> 체중 감량 필요
+        for (String[] activity : activities) {
+            // activity[2]는 날짜 (예: "2024-12-01")입니다.
+            LocalDate date = LocalDate.parse(activity[2], formatter);
+            grouped.computeIfAbsent(date, k -> new ArrayList<>()).add(activity);
+        }
+    
+        return grouped;
     }
     
-    else if(user.getWeight() >= minWeight && user.getWeight() <= maxWeight)
-    {
-        return 2; //권장 몸무게 범위 내 
-    }
-    else if(user.getWeight()<minWeight)
-    {
-        return 3; //권장 몸무게보다 가벼움 -> 체중 증량 필요 
-    }
-    else
-    {
-        return 0; // 기본값: 유효하지 않은 경우
-    }
+    public String debugActivities() {
+        StringBuilder debugLog = new StringBuilder("===== Debugging Activities =====\n");
+        for (String[] activity : activityLog.getActivities()) {
+            debugLog.append(String.format("Type: %s, Name: %s, Date: %s\n", activity[0], activity[1], activity[2]));
+        }
+        return debugLog.toString();
     }
 
-
-//사용자의 현상황에 적합한 제안 출력 
-public void printRecommend()
-{
-    if(checkBodyFatPercentage()==1 && checkIdealWeight()==1) //체지방률 높 ,권장몸무게 높 
-    {
-        System.out.println("감량이 필요합니다! 식단과 병행하는 고강도 운동이 필요합니다.일일 권장 칼로리에 300~500kcal를\r\n" + //
-                        "줄인 고단백 저탄수 식단을 섭취해 주세요.\r\n" + //
-                        "고강도 유산소운동과 근력 운동을 병행해 주세요");
+    public String generateDailySummary() {
+        List<String[]> activities = activityLog.getActivities(); // 모든 기록을 가져옴
+        Map<String, StringBuilder> groupedRecords = new TreeMap<>(); // 날짜별 기록을 저장하기 위한 Map
+    
+        // 날짜별로 기록 분류
+        for (String[] activity : activities) {
+            String date = (activity[0].equals("식단")) ? activity[3] : activity[2]; // 식단 날짜는 activity[3], 운동 날짜는 activity[2]
+            groupedRecords.putIfAbsent(date, new StringBuilder());
+    
+            if (activity[0].equals("식단")) { // 식단 기록
+                groupedRecords.get(date).append(String.format(
+                    "아침: %s - 점심: %s - 저녁: %s\n", activity[1], activity[2], activity[6]
+                ));
+            } else { // 운동 기록
+                groupedRecords.get(date).append(String.format(
+                    "운동 이름(운동 종류): %s (%s)\n", activity[1], activity[0]
+                ));
+            }
+        }
+    
+        // 최종 출력 문자열 생성
+        StringBuilder result = new StringBuilder("===== 월간 리포트 =====\n");
+        for (Map.Entry<String, StringBuilder> entry : groupedRecords.entrySet()) {
+            result.append(String.format("날짜: %s\n", entry.getKey()));
+            result.append(entry.getValue());
+            result.append("\n");
+        }
+    
+        if (result.toString().equals("===== 월간 리포트 =====\n")) {
+            return "아직 입력된 기록이 없습니다.";
+        }
+    
+        return result.toString();
     }
-    else if(checkBodyFatPercentage()==2 && checkIdealWeight()==2)//체지방률 o ,권장몸무게 o
-    {
-        System.out.println("잘하고 있어요! 현재 상태를 유지하기 위해 일일 권장 칼로리를 섭취하고, \r\n" + //
-                        "    가벼운 생활 운동을 병행하도록 해요.");
-    }
-    else if(checkBodyFatPercentage()==3 && checkIdealWeight()==3)//체지방률 낮 ,권장몸무게 낮
-    {
-        System.out.println("체중 증가와 근력 향상이 필요합니다. 일일 권장 칼로리에 300~500kcal를\r\n" + //
-                        "추가하여 고단백 고열량 식단을 섭취해 주세요.\r\n" + //
-                        "근력 운동을 중심으로 운동해 주세요.\r\n" + //
-                        "");
-    }
-    else if(checkBodyFatPercentage()==2 && checkIdealWeight()==1)//체지방률 o ,권장몸무게 높
-    {
-        System.out.println("현재 체지방률을 유지하며  체중을 줄입시다!\r\n" + //
-                        "저칼로리 식단과 함께 유산소 운동, 근력 운동을 병행합시다.");
-    }
-    else if(checkBodyFatPercentage()==2 && checkIdealWeight()==3)//체지방률 o ,권장몸무게 낮
-    {
-        System.out.println("현재 체지방률을 유지하며 체중 증가가 필요합니다.\r\n" + //
-                        "고칼로리 식단과 함께 근력 운동 위주의 운동과 함께 가벼운 유산소 운동을 병행합시다.");
-    }
-    else if(checkBodyFatPercentage()==1 && checkIdealWeight()==2)//체지방률 높 ,권장몸무게 o
-    {
-        System.out.println("체지방을 줄이고 체중을 유지합시다!\r\n" + //
-                        "저탄수 고단백 식단과 함께 고강도 유산소 운동과 근력 운동을 병행합시다!");
-    }
-    else if(checkBodyFatPercentage()==3 && checkIdealWeight()==1)//체지방률 낮 ,권장몸무게 높
-    {
-        System.out.println("아주 건강한 몸을 잘 유지하고 계시는 군요! 현재 상태를 유지하기 위해 노력합시다!");
-    }
-
+    
     
 
 
     
-}
-        
-
-
-
-
-
-
-
-
-
+    
 }
